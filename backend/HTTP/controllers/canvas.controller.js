@@ -14,8 +14,10 @@ export const createCanvas = async (req, res) => {
                 shareToken: req.body.shareToken || null,
             }
         });
-
-        res.json(canvas);
+        res.status(201).json({
+            message: "successfully created canvas",
+            canvasId: canvas.id
+        });
     }catch(err){
         res.status(500).json({
             message: err.message || "Internal server error."

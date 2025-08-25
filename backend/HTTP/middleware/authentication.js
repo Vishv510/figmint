@@ -4,7 +4,6 @@ const authentication = async (req, res, next) => {
 
     try{
         const authHeader = req.headers.authorization || '';
-
         const [,jwtToken] = authHeader.split(' ');
          
         if(!jwtToken){
@@ -18,6 +17,8 @@ const authentication = async (req, res, next) => {
         req.user = {
             _id: decoded.id
         }
+
+        console.log("Succes fully doen middelware");
         next();
     }catch( err){
         console.error(err);
@@ -27,7 +28,7 @@ const authentication = async (req, res, next) => {
             });
         }
         return res.status(500).json({
-            message: "Internal server error."
+            message: "Internal server error12."
         })
     }
 }

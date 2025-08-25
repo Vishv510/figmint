@@ -4,8 +4,8 @@ const saltRounds = 9;
 
 export async function hashPassword(password) {
     try{
-        const salt = await brcrypt.genSalt(saltRounds);
-        const hash = await brcrypt.hash(password, salt);
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hash = await bcrypt.hash(password, salt);
 
         return hash;
     } catch(err){

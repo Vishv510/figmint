@@ -13,7 +13,7 @@ function broadCast(message, canvasId, sender){
     const set = canvasClient.get(canvasId);
     if(!set || set.size === 0) return;
     
-    for(const client of canvasClient.get(canvasId)){
+    for(const client of set){
         if(client !== sender && client.readyState === client.OPEN){
             client.send(message);
         }
@@ -82,6 +82,15 @@ server.on('connection', (ws, req) => {
 
             if(type === 'drawShape'){
                 const { shape } = data;
+                const shapeType = typeof shape.type === "string" ? shape.type.toUpperCase() : null;
+
+                if (!shapeType) {
+                ws.send(JSON.stringify({
+                    type: "error",
+                    message: "Invalid shape type"
+                }));
+                return;
+                }
                 canvasId = data.canvasId;
                 const clients = canvasClient.get(canvasId) || [];
 
@@ -96,7 +105,7 @@ server.on('connection', (ws, req) => {
                             canvas:{
                                 connect: {id: canvasId}
                             },
-                            type: shape.type,
+                            type: shapeType,
                             x: shape.x,
                             y: shape.y,
                             width: shape.width || null,
@@ -131,12 +140,11 @@ server.on('connection', (ws, req) => {
             if(type === 'deleteShape'){
                 const deletedShape = await prisma.Shape.delete({
                     where: {
-                        id: data.id, 
-                        canvasId
+                        id: data.id
                     }
                 });
 
-                if(deletedShape.count === 0){
+                if(!deletedShape.count){
                     ws.send(JSON.stringify({
                         type: 'error',
                         message: 'Shape not found or already deleted'
@@ -229,4 +237,6 @@ server.on('connection', (ws, req) => {
     });
 });
 
-console.log(' WebSocket server running on ws://localhost:8080');
+server.on("listening", () => {
+    console.log(` WebSocket server running on ws://localhost:${process.env.PORT}`);
+})

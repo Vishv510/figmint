@@ -37,6 +37,7 @@ export default function useCanvasDrawing(canvasRef) {
       };
 
       ws.onmessage = (event) => {
+        console.log("Message:", event.data);
         const message = JSON.parse(event.data);
         switch(message.type) {
           case "initialShapes":
@@ -55,7 +56,7 @@ export default function useCanvasDrawing(canvasRef) {
             })
             break;
 
-          case "shapeDeleted": 
+          case "deleteShape": 
             setShapes(prev => prev.filter(s => s.id !== message.data.id));
             break;
           
@@ -66,10 +67,6 @@ export default function useCanvasDrawing(canvasRef) {
 
       ws.onclose = () =>{ 
         console.log("Websocket disconnected");
-      };
-
-      return () => {
-        ws.close();
       };
     }
   }, [setShapes]);
@@ -107,10 +104,15 @@ export default function useCanvasDrawing(canvasRef) {
     // let shapeStrokeWidth = strokeWidth;
     
     if (tool === "earser") {
-        // shapeType = "freehand"; // Or a new "earser" type if you prefer
-        // shapeColor = "#ffffff"; // The background color
-        // shapeStrokeWidth = 10; // A wider stroke for the eraser
-        setFreehandPoints([{ x: offsetX, y: offsetY }]);
+      const clickedShapeId = shapes.findLast(
+        s => isPointInsideShape(offsetX, offsetY, s) 
+      )?.id;
+  
+      if(clickedShapeId) {
+        setShapes(prev => prev.filter(s => s.id !== clickedShapeId));
+      }
+
+      return ;
     }
 
     const tempShape = {
@@ -293,4 +295,66 @@ export default function useCanvasDrawing(canvasRef) {
   }, [history, historyIndex, setShapes]);
 
   return { handleMouseDown, handleMouseMove, handleMouseUp, undo, redo };
+}
+
+
+
+//helper function:
+function isPointInsideShape(x, y, shape){
+  switch (shape.type) {
+    case "rectangle" : 
+      return (
+        x >= shape.x &&
+        x <= shape.x + shape.width &&
+        y >= shape.y && 
+        y <= shape.y + shape.height
+      );
+
+    case "circle":  {
+      const dx = x - shape.cx;
+      const dy = y - shape.cy;
+      return dx * dx + dy * dy <= shape.r * shape.r;
+    }
+
+    case "line":
+    case "arrow": 
+      return pointNearLine(x, y, shape.x1, shape.y1, shape.x2, shape.y2);
+
+    case "freehand":
+    case "text":
+      return (
+        x >= shape.x &&
+        x <= shape.x + shape.width &&
+        y >= shape.y - shape.fontSize &&
+        y <= shape.y
+      )
+  }
+}
+
+function pointNearLine(px, py, x1, y1, x2, y2, tolerance = 5){
+  const A = px - x1, B = py - y1, C = x2 - x1, D = y2 - y1;
+
+  const dot = A * C + B * D;
+  const lenSq = C * C + D * D;
+  let param = -1;
+  if(lenSq !== 0) 
+    param = dot / lenSq;
+
+  let xx, yy;
+  if(param < 0) {
+    xx = x1;
+    yy = y1;
+  } else if (param > 1){
+    xx = x2;
+    yy = y2;
+  } else {
+    xx = x1 + param * C;
+    yy = y1 + param * D;
+  }
+
+  const dx = px - xx;
+  const dy = py - yy;
+
+  return dx * dx + dy * dy <= tolerance * tolerance;
+
 }

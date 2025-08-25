@@ -5,10 +5,7 @@ const AuthForm = () => {
   const { login, signup } = useAuth();
 
   const [isSignup, setIsSignup] = useState(false);
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+  const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 

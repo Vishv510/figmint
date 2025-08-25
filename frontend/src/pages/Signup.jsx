@@ -27,6 +27,11 @@ export default function Signup() {
       console.log("here");
       const data = await signup(name, email, password); // 🔥 call backend signup
       console.log(data);                  // redirect after signup
+      
+      const canvasId = localStorage.getItem("cavasId");
+      if(canvasId){
+        navigate("/canvas");
+      }
       navigate("/login");
     } catch (err) {
       console.log(err);

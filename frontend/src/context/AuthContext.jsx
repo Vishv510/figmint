@@ -1,3 +1,4 @@
+import { CloudSnow } from "lucide-react";
 import { createContext, useState, useEffect} from "react";
 
 const AuthContext = createContext(null);
@@ -30,14 +31,37 @@ export function AuthProvider({ children }){
             );
 
             if(!res.ok)
-                throw new Error("Signup failed");
+                throw new Error("Signup failed, input data not correct");
 
             const data = await res.json();
             setUser(data.user); 
-            localStorage.setItem("Token", JSON.stringify(data.authentication.token));
-            localStorage.setItem("canvasId", JSON.stringify(data.user.id));
+            localStorage.setItem("Token", data.authentication.token);
+            localStorage.setItem("userId", data.user.id);
+            
+            let userId = data.user.id;
+            let canvasId= localStorage.getItem("canvasId") || null;
+            if(!canvasId){
+                const resC = await fetch("http://localhost:3000/canvas/", {
+                        method: "POST",
+                        headers: {
+                            "authorization": `Bearer ${localStorage.getItem("Token")}`,
+                            "Content-Type": "application/json", 
+                        },
+                        body: JSON.stringify({
+                            name: "My canvas"
+                        })
+                    }
+                );
 
-            return data;
+                if(!resC.ok)
+                    throw new Error("canvas creation failed");
+      
+                const canvasData = await resC.json();
+                canvasId = canvasData.canvasId;
+            }
+            localStorage.setItem("canvasId", canvasId);
+            
+            return {canvasId, userId};
         } catch (err){
             throw new Error(err.message);
         }    
@@ -45,7 +69,6 @@ export function AuthProvider({ children }){
 
     async function signup(name, email, password) {
         try{
-            console.log("hello");
             const res = await fetch(
                 "http://localhost:3000/auth/signup",{
                     method: "POST",
@@ -57,7 +80,7 @@ export function AuthProvider({ children }){
                      headers: { "Content-Type": "application/json" },
                 }
             );
-            console.log(res);
+            
             const data = await res.json();
             if(!res.ok){
                 throw new Error(data.message || "Signup failed");
@@ -66,7 +89,7 @@ export function AuthProvider({ children }){
 
             setUser(data.user);
 
-            localStorage.setItem("userId", JSON.stringify(data.user.id));
+            localStorage.setItem("userId", `${JSON.stringify(data.user.id)}`);
             return data;
         }catch (err) {
             alert(err.message);
