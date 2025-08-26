@@ -37,7 +37,7 @@ export function UpperToolbar() {
             <button className="pr-2 pl-2 hover:shadow hover:bg-gray-300" onClick={() => changeShape("mouse")}>
                 <TypeOutline className="w-5 h-5"/>
             </button>
-            <button className="pr-2 pl-2 hover:shadow hover:bg-gray-300" onClick={() => changeShape("erase")}>
+            <button className="pr-2 pl-2 hover:shadow hover:bg-gray-300" onClick={() => changeShape("eraser")}>
                 <Eraser className="w-5 h-5"/>
             </button>
         </div>

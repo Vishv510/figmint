@@ -9,9 +9,12 @@ export default function useCanvasDrawing(canvasRef) {
   const { shapes, addShape, setShapes, tool, color, strokeWidth } = useCanvas();
 
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isErasing, setIsErasing] = useState(false);
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
   const [freehandPoints, setFreehandPoints] = useState([]);
+  const [eraserPath, setEraserPath] = useState([]);
+
 
   const [myTempShape, setMyTempShape] = useState(null);
   const [liveShapes, setLiveShape] = useState(new Map());
@@ -19,15 +22,18 @@ export default function useCanvasDrawing(canvasRef) {
   // New state for undo/redo history
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-
+  
   const wsRef = useRef(null);
-
+  const lastEraseTime = useRef(0);
+  const ERASE_DEBOUNCE_MS = 50;
+  const deletedShapeIds = useRef(new Set()); // Track already deleted shapes
+  
   //websocket setup
   useEffect(() => {
     if(!wsRef.current){
       const ws = new WebSocket('ws://localhost:8080');
       wsRef.current = ws;
-
+      
       ws.onopen = () => {
         console.log("WebSocket connencted");
         ws.send(JSON.stringify({
@@ -40,16 +46,21 @@ export default function useCanvasDrawing(canvasRef) {
         console.log("Message:", event.data);
         const message = JSON.parse(event.data);
         switch(message.type) {
-          case "initialShapes":
-            setShapes(message.data);
+          case "initialShapes": {
+            const shapesWithIds = message.data.map(shape => ({
+              ...shape,
+              id: shape.id || `temp-${Date.now()}-${Math.random()}` // Fallback ID
+            }));
+            setShapes(shapesWithIds);
             break;
+          }
 
           case "newShape": 
             setShapes(prev => [...prev, message.data]);
             break;
           
-          case "liveShapeUpdate":
-            setLiveShape(prev => {
+            case "liveShapeUpdate":
+              setLiveShape(prev => {
               const newMap = new Map(prev);
               newMap.set(message.data.id, message.data);
               return newMap
@@ -57,40 +68,126 @@ export default function useCanvasDrawing(canvasRef) {
             break;
 
           case "deleteShape": 
-            setShapes(prev => prev.filter(s => s.id !== message.data.id));
+          setShapes(prev => prev.filter(s => s.id !== message.data.id));
             break;
-          
+            
           default:
             console.log("Unknow message type:", message.type);
-        }
-      };
+          }
+        };
 
-      ws.onclose = () =>{ 
-        console.log("Websocket disconnected");
-      };
+        ws.onclose = () =>{ 
+          console.log("Websocket disconnected");
+        };
     }
   }, [setShapes]);
 
   const redrawCanvas = useCallback(
     (ctx) => {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      shapes.forEach((shape) => drawShape(ctx, shape));
-
+      
+      // Draw shapes
+      shapes.forEach((shape) => {
+        drawShape(ctx, shape);
+      });
+      
       if(myTempShape) {
         drawShape(ctx, myTempShape);
       }
-
+      
       liveShapes.forEach((shape) => drawShape(ctx, shape));
-    },
-    [shapes, myTempShape, liveShapes]
-  );
-
+      
+      // Draw eraser path (visual feedback)
+      if (tool === "eraser" && eraserPath.length > 0) {
+        ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        
+        eraserPath.forEach((point, index) => {
+          if (index === 0) {
+          ctx.moveTo(point.x, point.y);
+        } else {
+          ctx.lineTo(point.x, point.y);
+        }
+      });
+      
+      ctx.stroke();
+      
+      // Draw current eraser position
+      if (eraserPath.length > 0) {
+        const lastPoint = eraserPath[eraserPath.length - 1];
+        ctx.beginPath();
+        ctx.arc(lastPoint.x, lastPoint.y, 8, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+        ctx.fill();
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    }
+  },[shapes, myTempShape, liveShapes, tool, eraserPath]);
+  
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     redrawCanvas(ctx);
-  }, [canvasRef, redrawCanvas]);
+    
+    if(tool === "eraser" && isErasing){
+      ctx.beginPath();
+      ctx.arc(startX, startY, 10, 0, Math.PI * 2);
+      ctx.strokeStyle = 'red';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+  }, [canvasRef, redrawCanvas, tool, isErasing, startX, startY]);
+  
+  const eraseAtPosition = useCallback((x, y) => {
+    console.log('Eraser at position:', x, y);
+    const now = Date.now();
+    if (now - lastEraseTime.current < ERASE_DEBOUNCE_MS) {
+      return;
+    }
+    lastEraseTime.current = now;
+
+    const validShapes = shapes.filter(shape => shape && shape.id);
+    const shapesToDelete = validShapes.filter(shape => {
+      if(deletedShapeIds.current.has(shape.id)) return false;
+      return isPointInsideShape(x, y, shape);
+    });  
+    
+    if (shapesToDelete.length > 0) { // Ensure shape has an ID    
+      shapesToDelete.forEach(shape => {
+        deletedShapeIds.current.add(shape.id);
+      });
+
+      const shapeIdsToDelete = shapesToDelete.map(shape => shape.id);
+      setShapes(prev => prev.filter(s => !shapeIdsToDelete.includes(s.id)));
+      
+      shapesToDelete.forEach(shapeToDelete => {
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({
+            type: "deleteShape",
+            data: { 
+              id: shapeToDelete.id, // Make sure this is the database ID
+              canvasId: canvasId 
+            }
+          }));
+        }
+      });
+
+      const newHistory = history.slice(0, historyIndex + 1);
+      shapesToDelete.forEach(shapeToDelete => {
+        newHistory.push({
+          type: "delete", shape: shapeToDelete 
+        })
+      });
+      setHistory(newHistory);
+      setHistoryIndex(newHistory.length - 1); 
+    }else {
+      console.log('No shape found at position or shape missing ID');
+    }
+  }, [ shapes, history, historyIndex]);
 
   const handleMouseDown = useCallback((e) => {
     const { offsetX, offsetY } = e.nativeEvent;
@@ -99,19 +196,13 @@ export default function useCanvasDrawing(canvasRef) {
     setStartX(offsetX);
     setStartY(offsetY);
 
-    // let shapeType = tool;
-    // let shapeColor = color;
-    // let shapeStrokeWidth = strokeWidth;
-    
-    if (tool === "earser") {
-      const clickedShapeId = shapes.findLast(
-        s => isPointInsideShape(offsetX, offsetY, s) 
-      )?.id;
-  
-      if(clickedShapeId) {
-        setShapes(prev => prev.filter(s => s.id !== clickedShapeId));
-      }
+    deletedShapeIds.current.clear();
 
+    if(tool === "eraser"){
+      console.log('Eraser clicked at:', offsetX, offsetY);
+      setIsErasing(true);
+      eraseAtPosition(offsetX, offsetY);
+      setEraserPath([{x: offsetX, y: offsetY}]);
       return ;
     }
 
@@ -130,29 +221,26 @@ export default function useCanvasDrawing(canvasRef) {
 
     setMyTempShape(tempShape);
 
-    // if (tool === "freehand") {
-    //   setFreehandPoints([{ x: offsetX, y: offsetY }]);
-    // }
-
-    if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+    if(tool !== "eraser" && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
         type: "drawLiveShape",
         data: { canvasId, shape: tempShape }
       }));
     }
 
-  }, [tool, color, strokeWidth]);
+  }, [tool, color, strokeWidth, eraseAtPosition]);
 
   const handleMouseMove = useCallback((e) => {
     if (!isDrawing || !myTempShape) return;
     const { offsetX, offsetY } = e.nativeEvent;
 
+    if(tool === "eraser" && isErasing){
+      eraseAtPosition(offsetX, offsetY);
+      setEraserPath(prev => [...prev, {x: offsetX, y: offsetY}]);
+      return ;
+    }
+    
     let updatedShape = { ...myTempShape };
-
-    // if (tool === "freehand") {
-    //   setFreehandPoints((prev) => [...prev, { x: offsetX, y: offsetY }]);
-    // }
-
     switch (tool) {
       case "rectangle":
       case "line":
@@ -176,18 +264,25 @@ export default function useCanvasDrawing(canvasRef) {
 
     setMyTempShape(updatedShape);
 
-    if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN){
+    if(tool !== "eraser" && wsRef.current && wsRef.current.readyState === WebSocket.OPEN){
       wsRef.current.send(JSON.stringify({
         type: "drawLiveShape",
         data: {canvasId, shapes: updatedShape}
       }));
     }
-  }, [isDrawing, myTempShape, startX, startY, tool, freehandPoints]); 
+  }, [isDrawing, myTempShape, startX, startY, tool, freehandPoints, isErasing, eraseAtPosition]); 
 
   const handleMouseUp = useCallback((e) => {
     if (!isDrawing || !myTempShape) return;
     setIsDrawing(false);
-
+    
+    if( tool === "eraser"){
+      setIsErasing(false);
+      setEraserPath([]);
+      deletedShapeIds.current.clear();
+      return ;
+    }
+    
     const { offsetX, offsetY } = e.nativeEvent;
     let finalShape = {...myTempShape};
 
@@ -249,7 +344,8 @@ export default function useCanvasDrawing(canvasRef) {
     }
 
     setMyTempShape(null);
-  }, [isDrawing, startX, startY, tool, freehandPoints, myTempShape, history, historyIndex]);
+    setFreehandPoints([]);
+  }, [isDrawing, startX, startY, tool, freehandPoints, myTempShape, history, historyIndex, addShape, color, strokeWidth]);
 
   const undo = useCallback(() => {
     if(historyIndex > -1){
@@ -261,77 +357,127 @@ export default function useCanvasDrawing(canvasRef) {
         setShapes(prev => prev.filter(s => s.id !== shapeIdToDelete));
 
         if(wsRef && wsRef.current.readyState === WebSocket.OPEN){
-          wsRef.current.send(JSON.stringify({
-            type: "deleteShape",
-            data: {
-              id: shapeIdToDelete,
-              canvasId
+         const shapeIdToDelete = lastAction.shape.id;
+          // Only proceed if we have a valid ID
+          if (shapeIdToDelete) {
+            setShapes(prev => prev.filter(s => s.id !== shapeIdToDelete));
+
+            if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN){
+              wsRef.current.send(JSON.stringify({
+                type: "deleteShape",
+                data: {
+                  id: shapeIdToDelete,
+                  canvasId
+                }
+              }));
             }
-          }));
+          }
+        }
+      }else if (lastAction.type === "delete") {
+      // Redo a deletion (add the shape back)
+        if (lastAction.shape.id) {
+          setShapes(prev => [...prev, lastAction.shape]);
+          
+          if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN){
+            wsRef.current.send(JSON.stringify({
+              type: "drawShape",
+              data: {
+                canvasId,
+                shape: lastAction.shape
+              }
+            }));
+          }
         }
       }
     }
   }, [history, historyIndex, setShapes]);
 
-  const redo = useCallback(() => {
-    if(historyIndex < history.length - 1){
-      const nextAction = history[historyIndex + 1];
-      setHistoryIndex(prev => prev + 1);
+  // const redo = useCallback(() => {
+  //   if(historyIndex < history.length - 1){
+  //     const nextAction = history[historyIndex + 1];
+  //     setHistoryIndex(prev => prev + 1);
 
-      if(nextAction.type === "add"){
-        setShapes(prev => [...prev, nextAction.shape]);
+  //     if(nextAction.type === "add"){
+  //       setShapes(prev => [...prev, nextAction.shape]);
 
-        if(wsRef && wsRef.current.readyState === WebSocket.OPEN){
-          wsRef.current.send(JSON.stringify({
-            type: "drawShape",
-            data: {
-              canvasId,
-              shape: nextAction.shape
-            }
-          }));
-        }
-      }
-    }
-  }, [history, historyIndex, setShapes]);
+  //       if(wsRef && wsRef.current.readyState === WebSocket.OPEN){
+  //         wsRef.current.send(JSON.stringify({
+  //           type: "drawShape",
+  //           data: {
+  //             canvasId,
+  //             shape: nextAction.shape
+  //           }
+  //         }));
+  //       }
+  //     }
+  //   }
+  // }, [history, historyIndex, setShapes]);
+    
 
-  return { handleMouseDown, handleMouseMove, handleMouseUp, undo, redo };
+  return { handleMouseDown, handleMouseMove, handleMouseUp, undo };
 }
 
 
 
 //helper function:
 function isPointInsideShape(x, y, shape){
-  switch (shape.type) {
+  if(!shape )return false;
+
+  switch (shape.type.toLowerCase()) {
     case "rectangle" : 
       return (
         x >= shape.x &&
-        x <= shape.x + shape.width &&
+        x <= shape.x + (shape.width || 0) &&
         y >= shape.y && 
-        y <= shape.y + shape.height
+        y <= shape.y + (shape.height || 0)
       );
 
     case "circle":  {
-      const dx = x - shape.cx;
-      const dy = y - shape.cy;
-      return dx * dx + dy * dy <= shape.r * shape.r;
+      const dx = x - shape.x;
+      const dy = y - shape.y;
+      const radius = shape.radius || 0;
+      return dx * dx + dy * dy <= radius * radius;
     }
 
     case "line":
     case "arrow": 
-      return pointNearLine(x, y, shape.x1, shape.y1, shape.x2, shape.y2);
+      return pointNearLine(
+        x, y, 
+        shape.x, shape.y, 
+        shape.x + (shape.width || 0), 
+        shape.y + (shape.height || 0)
+      );
 
-    case "freehand":
-    case "text":
+    case "freehand":{
+      if(!shape.points || shape.points.length === 0)  return false;
+
+      return shape.points?.some(p => 
+        Math.abs(x - p.x) < 10 && Math.abs(y - p.y) < 10
+      );}
+
+    case "text":{
+      const textWidth = (shape.text || '').length * (shape.fontSize || 16) * 0.6;
+      const textHeight = shape.fontSize || 16;
       return (
         x >= shape.x &&
-        x <= shape.x + shape.width &&
-        y >= shape.y - shape.fontSize &&
+        x <= shape.x + textWidth &&
+        y >= shape.y - textHeight &&
         y <= shape.y
       )
+    }
+
+    default :
+      return false;
   }
 }
 
-function pointNearLine(px, py, x1, y1, x2, y2, tolerance = 5){
+function pointNearLine(px, py, x1, y1, x2, y2, tolerance = 15){
+   if (x1 === x2 && y1 === y2) {
+    const dx = px - x1;
+    const dy = py - y1;
+    return Math.sqrt(dx * dx + dy * dy) <= tolerance;
+  }
+
   const A = px - x1, B = py - y1, C = x2 - x1, D = y2 - y1;
 
   const dot = A * C + B * D;
@@ -355,6 +501,6 @@ function pointNearLine(px, py, x1, y1, x2, y2, tolerance = 5){
   const dx = px - xx;
   const dy = py - yy;
 
-  return dx * dx + dy * dy <= tolerance * tolerance;
+  return Math.sqrt(dx * dx + dy * dy) <= tolerance;
 
 }

@@ -87,7 +87,7 @@ enum ShapeType {
   DIAMOND
   PENCIL
   TEXT
-  IMAGE
+  LINE
 }
 
 enum LineType {

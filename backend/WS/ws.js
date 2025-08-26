@@ -84,9 +84,9 @@ server.on('connection', (ws, req) => {
                 const { shape } = data;
                 const shapeType = typeof shape.type === "string" ? shape.type.toUpperCase() : null;
 
-                if (!shapeType) {
+                if (!shapeType || shapeType === "ERASE") {
                 ws.send(JSON.stringify({
-                    type: "error",
+                    type: "error", 
                     message: "Invalid shape type"
                 }));
                 return;
@@ -138,31 +138,56 @@ server.on('connection', (ws, req) => {
             }
 
             if(type === 'deleteShape'){
-                const deletedShape = await prisma.Shape.delete({
-                    where: {
-                        id: data.id
-                    }
-                });
-
-                if(!deletedShape.count){
+                console.log('Delete shape request:', data);
+                const { id } = data;
+                if(!id) {
                     ws.send(JSON.stringify({
-                        type: 'error',
-                        message: 'Shape not found or already deleted'
+                        type: "error",
+                        message: "Shape ID is required for deletion"
                     }));
-                    return;
+                    return ;
                 }
 
-                await prisma.History.create({
-                    data: {
-                        canvas: {
-                            connect: {id: ws.canvasId}
-                        },
-                        action: "delete_shape",
-                        data: deletedShape
-                    }
-                });
+                try{
+                    const deletedShape = await prisma.Shape.delete({
+                        where: {
+                            id: data.id
+                        }
+                    });
 
-                broadCast(JSON.stringify({type: 'shapeDeleted', data: deletedShape}), canvasId, ws);
+                    if(!deletedShape.count){
+                        ws.send(JSON.stringify({
+                            type: 'error',
+                            message: 'Shape not found or already deleted'
+                        }));
+                        return;
+                    }
+
+                    await prisma.History.create({
+                        data: {
+                            canvas: {
+                                connect: {id: ws.canvasId}
+                            },
+                            action: "delete_shape",
+                            data: deletedShape
+                        }
+                    });
+
+                    broadCast(JSON.stringify({type: 'shapeDeleted', data: deletedShape}), canvasId, ws);
+                }catch (err){
+                    console.error("error deleting shape: ", err);
+                    if(err.code === "P2025"){
+                        ws.send(JSON.stringify({
+                            type: "error",
+                            message: "Shape not found or already deleted"
+                        }));
+                    }else{
+                        ws.send(JSON.stringify({
+                            type: "error",
+                            message: "failed to deleted shape"
+                        }));
+                    }
+                }
             }
 
 

@@ -10,7 +10,8 @@ export function drawShape(ctx, shape) {
   ctx.strokeStyle = shape.color || "#000";
   ctx.fillStyle = shape.fill || "transparent";
 
-  switch (type) {
+  const shapeType = type.toLowerCase();
+  switch (shapeType) {
     case "rectangle":
       ctx.rect(x, y, width, height);
       ctx.fill();
@@ -78,7 +79,7 @@ export function drawShape(ctx, shape) {
       ctx.fillText(text || "", x, y);
       break;
 
-    case " eraser": 
+    case "eraser": 
       if(points && points.length > 1){
         ctx.strokeStyle = shape.color || "#ffffff";
         ctx.lineWidth = shape.strokeWidth || 10;
