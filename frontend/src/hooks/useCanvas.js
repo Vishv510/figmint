@@ -390,31 +390,33 @@ export default function useCanvasDrawing(canvasRef) {
         }
       }
     }
+    setHistoryIndex(i => i - 1);
   }, [history, historyIndex, setShapes]);
 
-  // const redo = useCallback(() => {
-  //   if(historyIndex < history.length - 1){
-  //     const nextAction = history[historyIndex + 1];
-  //     setHistoryIndex(prev => prev + 1);
+  const redo = useCallback(() => {
+    if(historyIndex < history.length - 1){
+      const nextAction = history[historyIndex + 1];
+      setHistoryIndex(prev => prev + 1);
 
-  //     if(nextAction.type === "add"){
-  //       setShapes(prev => [...prev, nextAction.shape]);
+      if(nextAction.type === "add"){
+        setShapes(prev => [...prev, nextAction.shape]);
 
-  //       if(wsRef && wsRef.current.readyState === WebSocket.OPEN){
-  //         wsRef.current.send(JSON.stringify({
-  //           type: "drawShape",
-  //           data: {
-  //             canvasId,
-  //             shape: nextAction.shape
-  //           }
-  //         }));
-  //       }
-  //     }
-  //   }
-  // }, [history, historyIndex, setShapes]);
+        if(wsRef && wsRef.current.readyState === WebSocket.OPEN){
+          wsRef.current.send(JSON.stringify({
+            type: "drawShape",
+            data: {
+              canvasId,
+              shape: nextAction.shape
+            }
+          }));
+        }
+      }
+    }
+    setHistoryIndex(i => i - 1);
+  }, [history, historyIndex, setShapes]);
     
 
-  return { handleMouseDown, handleMouseMove, handleMouseUp, undo };
+  return { handleMouseDown, handleMouseMove, handleMouseUp, undo, redo };
 }
 
 

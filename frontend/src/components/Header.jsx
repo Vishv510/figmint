@@ -25,7 +25,7 @@ export function Header() {
                     console.log("something error in header.jsx in line 23");
                 }
                 const data = await res.json();
-                id = data.id;
+                const id = data.id;
                 setCanvasId(id);
             }catch(err){
                 console.error("Fetch error in Header.jsx:", err);
