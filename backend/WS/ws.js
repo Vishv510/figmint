@@ -23,8 +23,6 @@ function broadCast(message, canvasId, sender){
 server.on('connection', (ws, req) => {
     ws.on('error', console.error);
 
-    const query = url.parse(req.url, true).query;
-    const role = query.role || 'VIEWER';
     let canvasId = null;
     let userId = null;
 
@@ -33,9 +31,10 @@ server.on('connection', (ws, req) => {
     ws.on('message', async(message) => {
         try{
             const {type, data} = JSON.parse(message);
+            canvasId = data.canvasId;
+            const role = data.role || 'EDITOR';
 
             if(type === 'joinCanvas'){
-                canvasId = data.canvasId;
                 userId = data.userId;
                 // in this i use canvasId in general have one extra table which have canvasId(one) and userId(many) and generated string which use for joining time
                 if(!canvasClient.has(canvasId)) {
@@ -56,7 +55,7 @@ server.on('connection', (ws, req) => {
                         data: {
                             canvasId,
                             userId,
-                            role
+                            role:  role.toUpperCase()
                         }
                     })
                     ws.send(JSON.stringify({
@@ -77,31 +76,43 @@ server.on('connection', (ws, req) => {
                 const { shape } = data;
                 const canvasId = data.canvasId;
 
-                broadCast(JSON.stringify({ type: 'liveShapeUpdate', data: shape }), canvasId, ws);
+                broadCast(JSON.stringify({ 
+                    type: 'liveShapeUpdate', 
+                    data: shape 
+                }), canvasId, ws);
             }
 
             if(type === 'drawShape'){
                 const { shape } = data;
                 const shapeType = typeof shape.type === "string" ? shape.type.toUpperCase() : null;
 
-                if (!shapeType || shapeType === "ERASE") {
-                ws.send(JSON.stringify({
-                    type: "error", 
-                    message: "Invalid shape type"
-                }));
-                return;
+                const allowedTypes = ["RECTANGLE", "CIRCLE", "LINE", "ARROW", "DIAMOND", "TEXT", "FREEHAND"];
+                if (!allowedTypes.includes(shapeType)) {
+                    ws.send(JSON.stringify({
+                        type: "error",
+                        message: "Invalid shape type"
+                    }));
+                    return;
                 }
-                canvasId = data.canvasId;
+                
+                if(role === 'VIEWER'){
+                    ws.send(JSON.stringify({
+                        type: 'error',
+                        message: 'You do not have permission to draw shapes'
+                    }));
+                    return ;
+                }
+
                 const clients = canvasClient.get(canvasId) || [];
 
                 if(clients.size === 0){
                     console.error(`Client not part of canvas ${canvasId}`);
                     return;
                 }
-
                 try{
+                    console.log('Draw shape request:', shape);
                     const shapeData = await prisma.Shape.create({
-                       data: {
+                        data: {
                             canvas:{
                                 connect: {id: canvasId}
                             },
@@ -118,7 +129,7 @@ server.on('connection', (ws, req) => {
                             fillColor: shape.fillColor || null
                         }
                     });
-
+                    console.log('Shape saved:', shapeData);
                     await prisma.History.create({
                         data: {
                             canvasId,
@@ -126,14 +137,18 @@ server.on('connection', (ws, req) => {
                             data: shapeData
                         }
                     });
-
-                    broadCast(JSON.stringify({type: 'newShape', data: shapeData}), canvasId, ws);
+                    // console.log('Broadcasting new shape to other clients');
+                    broadCast(JSON.stringify({
+                        type: 'newShape', 
+                        data: shapeData
+                    }), canvasId, ws);
                 }catch(err) {
                     console.error('Error saving shape:', err);
                     ws.send(JSON.stringify({
                         type: 'error',
                         message: 'Failed to save shape'
                     }));
+                    return ;
                 }
             }
 
@@ -206,7 +221,7 @@ server.on('connection', (ws, req) => {
                             width: shape.width || null,
                             height: shape.height || null,
                             radius: shape.radius || null,
-                            points: shape.points || null,
+                            points: shape.points || [],
                             rotation: shape.rotation || 0,
                             lineType: shape.lineType || 'SOLID',
                             color: shape.color || '#ffffff',

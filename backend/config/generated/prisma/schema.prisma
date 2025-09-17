@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @unique @default(cuid())
+  username       String
+  email          String          @unique
+  password       String
+  canvases       Canvas[] // Relationship: user owns many canvases
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  collaborations Collaboration[] // Relationship: user can collaborate on many canvases
+}
+
+model Canvas {
+  id            String          @id @unique @default(cuid())
+  name          String
+  owner         User            @relation(fields: [ownerId], references: [id])
+  ownerId       String          @unique
+  shapes        Shape[]
+  zoomLevel     Float           @default(1.0) // 1.0 = 100%
+  panX          Float           @default(0) // Horizontal movement
+  panY          Float           @default(0) // Vertical movement
+  isReadOnly    Boolean         @default(false)
+  shareToken    String?         @unique
+  collaborators Collaboration[]
+  history       History[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model Shape {
+  id        String    @id @unique @default(cuid())
+  canvas    Canvas    @relation(fields: [canvasId], references: [id])
+  canvasId  String
+  type      ShapeType
+  x         Float // Position X
+  y         Float // Position Y
+  width     Float?
+  height    Float?
+  radius    Float? // For circles
+  points    Json? // For arrows/freehand
+  rotation  Float? // Rotation in degrees
+  lineType  LineType  @default(SOLID)
+  color     String    @default("#000000")
+  fillColor String? // Optional fill
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Collaboration {
+  id       String   @id @default(cuid())
+  canvas   Canvas   @relation(fields: [canvasId], references: [id])
+  canvasId String
+  users    User     @relation(fields: [userId], references: [id])
+  userId   String
+  role     Role     @default(EDITOR)
+  joinedAt DateTime @default(now())
+}
+
+model History {
+  id        String   @id @default(cuid())
+  canvas    Canvas   @relation(fields: [canvasId], references: [id])
+  canvasId  String
+  action    String // e.g., "add_shape", "delete_shape", "move_shape"
+  data      Json // Store old/new shape data
+  createdAt DateTime @default(now())
+}
+
+enum ShapeType {
+  RECTANGLE
+  CIRCLE
+  ARROW
+  DIAMOND
+  PENCIL
+  TEXT
+  LINE
+  FREEHAND
+}
+
+enum LineType {
+  SOLID
+  DOTTED
+}
+
+enum Role {
+  OWNER
+  EDITOR
+  VIEWER
+}

@@ -88,6 +88,7 @@ enum ShapeType {
   PENCIL
   TEXT
   LINE
+  FREEHAND
 }
 
 enum LineType {

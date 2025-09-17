@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext,  useState } from "react";
 
 export const CanvasContext = createContext(null);
 
@@ -54,7 +54,7 @@ export function CanvasProvider({ children }) {
     ]);
   };
 
-  const addFreehand = (points) => {
+  const addFreehand = (points, color, strokeWidth) => {
     setShapes(prev => [
       ...prev,
       { type: "freehand", points, color, strokeWidth }
