@@ -7,7 +7,7 @@ import { BottomToolbar } from "./Bottom";
 export function CanvasBoard () {
   const canvasRef = useRef(null);
 
-  const { handleMouseDown, handleMouseMove, handleMouseUp } = useCanvasDrawing(canvasRef);
+  const { handleMouseDown, handleMouseMove, handleMouseUp, undo, redo } = useCanvasDrawing(canvasRef);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -27,7 +27,7 @@ export function CanvasBoard () {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       />
-      <BottomToolbar />
+      <BottomToolbar undo={undo} redo= {redo} />
     </div>
   );
 };

@@ -25,8 +25,8 @@ export default function useCanvasDrawing(canvasRef) {
 
 
   // New state for undo/redo history
-  const [history, setHistory] = useState([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
+  // const [history, setHistory] = useState([]);
+  // const [historyIndex, setHistoryIndex] = useState(-1);
   
   const wsRef = useRef(null);
   const lastEraseTime = useRef(0);
@@ -132,7 +132,7 @@ export default function useCanvasDrawing(canvasRef) {
     liveShapes.forEach((shape) => drawShape(ctx, shape));
     
     // Draw eraser path (visual feedback)
-    if (tool === "eraser" && eraserPath.length > 0) {
+    if (tool === "eraser" && eraserPath.length > 0 ) {
       drawEraserPath(ctx, eraserPath);
     }
   },[shapes, myTempShape, liveShapes, tool, eraserPath, smoothPoints]);
@@ -173,6 +173,7 @@ export default function useCanvasDrawing(canvasRef) {
   }, [interpolatePoints]);
 
   const drawEraserPath = useCallback((ctx, path) => {
+    if(!isDrawing)  return;
     if (path.length === 0) return;
 
     ctx.save();
@@ -205,13 +206,13 @@ export default function useCanvasDrawing(canvasRef) {
     }
     
     ctx.restore();
-  }, []);
+  }, [isDrawing]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-     // Set canvas properties for better rendering
+    // Set canvas properties for better rendering
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     redrawCanvas(ctx);
@@ -219,6 +220,7 @@ export default function useCanvasDrawing(canvasRef) {
   }, [canvasRef, redrawCanvas, shapes, tool, isErasing, eraserPath]);
   
   const eraseAtPosition = useCallback((x, y) => {
+    // if(!isErasing) return ;
     console.log('Eraser at position:', x, y);
     const now = Date.now();
     if (now - lastEraseTime.current < ERASE_DEBOUNCE_MS) {
@@ -250,20 +252,25 @@ export default function useCanvasDrawing(canvasRef) {
             }
           }));
         }
+        console.log('Deleted shape ID:', shapeToDelete.id);
       });
 
-      const newHistory = history.slice(0, historyIndex + 1);
-      shapesToDelete.forEach(shapeToDelete => {
-        newHistory.push({
-          type: "delete", shape: shapeToDelete 
-        })
-      });
-      setHistory(newHistory);
-      setHistoryIndex(newHistory.length - 1); 
+      // const newHistory = history.slice(0, historyIndex + 1);
+      // shapesToDelete.forEach(shapeToDelete => {
+      //   wsRef.current.send(JSON.stringify({
+      //     type: "undo",
+      //     data: { 
+      //       id: shapeToDelete.id, // Make sure this is the database ID
+      //       canvasId: canvasId 
+      //     }
+      //   }))
+      // });
+      // setHistory(newHistory);
+      // setHistoryIndex(newHistory.length - 1); 
     }else {
       console.log('No shape found at position or shape missing ID');
     }
-  }, [ shapes, history, historyIndex]);
+  }, [ shapes]);
 
   const handleMouseDown = useCallback((e) => {
     const { offsetX, offsetY } = e.nativeEvent;
@@ -313,7 +320,7 @@ export default function useCanvasDrawing(canvasRef) {
       }));
     }
 
-  }, [tool, color, strokeWidth, eraseAtPosition]);
+  }, [tool, color, strokeWidth]);
 
   const handleMouseMove = useCallback((e) => {
     if (!isDrawing ) return;
@@ -322,9 +329,10 @@ export default function useCanvasDrawing(canvasRef) {
     const currentPoint = {x: offsetX, y: offsetY, pressure: currentPressure};
 
     if(tool === "eraser" && isErasing){
-      eraseAtPosition(offsetX, offsetY);
-      setEraserPath(prev => [...prev, currentPoint]);
-      
+      if(isErasing){
+        eraseAtPosition(offsetX, offsetY);
+        setEraserPath(prev => [...prev, currentPoint]);   
+      }
       return ;
     }
     if (!myTempShape) return;
@@ -375,16 +383,17 @@ export default function useCanvasDrawing(canvasRef) {
         }));
       }
     });
-  }, [isDrawing, myTempShape, startX, startY, tool, freehandPoints, isErasing, eraseAtPosition, lastPoint, getDistance, smoothPoints]); 
+  }, [isDrawing, myTempShape, startX, startY, tool]); 
 
   const handleMouseUp = useCallback((e) => {
     if (!isDrawing || !myTempShape) return;
     setIsDrawing(false);
     
-    if( tool === "eraser"){
+    if( tool === "eraser" || tool === "select"){
       setIsErasing(false);
       setEraserPath([]);
       deletedShapeIds.current.clear();
+      setMyTempShape(null);
       return ;
     }
     
@@ -458,10 +467,10 @@ export default function useCanvasDrawing(canvasRef) {
       }
     }
     
-    const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push({ type: "add", shape: finalShape });
-    setHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
+    // const newHistory = history.slice(0, historyIndex + 1);
+    // newHistory.push({ type: "add", shape: finalShape });
+    // setHistory(newHistory);
+    // setHistoryIndex(newHistory.length - 1);
 
     if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN){
       wsRef.current.send(JSON.stringify({
@@ -472,79 +481,26 @@ export default function useCanvasDrawing(canvasRef) {
 
     setMyTempShape(null);
     setFreehandPoints([]);
-    setFreehandPoints([]);
-  }, [isDrawing, startX, startY, tool, myTempShape, history, historyIndex, addShape, color, strokeWidth, smoothPoints]);
+  }, [isDrawing, startX, startY, tool, myTempShape, addShape, color, strokeWidth, smoothPoints]);
 
   const undo = useCallback(() => {
-    if(historyIndex > -1){
-      const lastAction = history[historyIndex];
-      setHistoryIndex(prev => prev -1);
-
-      if(lastAction.type === "add"){
-        const shapeIdToDelete = lastAction.shape.id;
-        if (shapeIdToDelete) {
-          setShapes(prev => prev.filter(s => s.id !== shapeIdToDelete));
-
-          if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN){
-            wsRef.current.send(JSON.stringify({
-              type: "deleteShape",
-              data: { id: shapeIdToDelete, canvasId }
-            }));
-          }
-        }
-      }else if (lastAction.type === "delete") {
-      // Redo a deletion (add the shape back)
-        if (lastAction.shape.id) {
-          setShapes(prev => [...prev, lastAction.shape]);
-          
-          if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN){
-            wsRef.current.send(JSON.stringify({
-              type: "drawShape",
-              data: {
-                canvasId,
-                shape: lastAction.shape
-              }
-            }));
-          }
-        }
-      }
-      setHistoryIndex(prev => prev - 1);
+    if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN){
+      wsRef.current.send(JSON.stringify({
+        type: "undo",
+        data: { canvasId, userId }
+      }));
     }
-  }, [history, historyIndex, setShapes]);
+  }, [canvasId, userId]);
 
   const redo = useCallback(() => {
-    if(historyIndex < history.length - 1){
-      const nextAction = history[historyIndex + 1];
-      // setHistoryIndex(prev => prev + 1);
-
-      if(nextAction.type === "add"){
-        setShapes(prev => [...prev, nextAction.shape]);
-
-        if(wsRef && wsRef.current.readyState === WebSocket.OPEN){
-          wsRef.current.send(JSON.stringify({
-            type: "drawShape",
-            data: {
-              canvasId,
-              shape: nextAction.shape
-            }
-          }));
-        }
-      }else if(nextAction.type === "delete"){
-        const shapeIdToDelete = nextAction.shape.id;
-        if (shapeIdToDelete) {
-          setShapes(prev => prev.filter(s => s.id !== shapeIdToDelete));
-
-          if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN){
-            wsRef.current.send(JSON.stringify({
-              type: "deleteShape", 
-              data: { id: shapeIdToDelete, canvasId }
-            }));
-          }
-        }
-      }  
-      setHistoryIndex(i => i + 1);
+    if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN){
+      wsRef.current.send(JSON.stringify({
+        type: "redo",
+        data: { canvasId, userId }
+      }));
     }
-  }, [history, historyIndex, setShapes]);
+  }, [canvasId, userId]);
+
   return { handleMouseDown, handleMouseMove, handleMouseUp, undo, redo, isDrawing, isErasing };
 }
 

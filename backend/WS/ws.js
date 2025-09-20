@@ -248,6 +248,100 @@ server.on('connection', (ws, req) => {
                     }));
                 }
             }
+
+            if(type === 'undo'){
+                const lastAction = await prisma.History.findFirst({
+                    where: { canvasId },
+                    orderBy: { createdAt: 'desc' }
+                });
+
+                if(!lastAction) return ;
+
+                if(lastAction.action === 'add_shape'){
+                    await prisma.Shape.delete({
+                        where: {id: lastAction.data.id}
+                    });
+
+                    prisma.History.findFirst({
+                        where: {id: lastAction.id},
+                        lastAction: "deleted_shape"
+                    });
+                }
+                else if(lastAction.action === 'delete_shape'){
+                    await prisma.Shape.create({
+                        data: {
+                            canvas:{
+                                connect: {id: canvasId}
+                            },
+                            type: lastAction.data.type,
+                            x: lastAction.data.x,
+                            y: lastAction.data.y,
+                            width: lastAction.data.width,
+                            height: lastAction.data.height,
+                            radius: lastAction.data.radius,
+                            points: lastAction.data.points,
+                            rotation: lastAction.data.rotation,
+                            lineType: lastAction.data.lineType,
+                            color: lastAction.data.color,
+                            fillColor: lastAction.data.fillColor
+                        }
+                    });
+
+                    await prisma.History.update({
+                        where: {id: lastAction.id},
+                        lastAction: "add_shape"
+                    });
+                }
+                const shapes = await prisma.Shape.findMany({ where: { canvasId } });
+                ws.send(JSON.stringify({ type: 'initialShapes', data: shapes }));
+            }
+
+            if(type === 'redo'){
+                const lastAction = await prisma.History.findFirst({
+                    wahere: { canvasId },
+                    orderBy: { createdAt: 'desc' } 
+                });
+                
+                if(!lastAction) return ;
+
+                if(lastAction.action === 'deleted_shape'){
+                    const previouse_shape = await prisma.Shape.create({
+                        data: {
+                            canvas:{
+                                connect: {id: canvasId}
+                            },
+                            type: lastAction.data.type,
+                            x: lastAction.data.x,
+                            y: lastAction.data.y,
+                            width: lastAction.data.width,
+                            height: lastAction.data.height,
+                            radius: lastAction.data.radius,
+                            points: lastAction.data.points,
+                            rotation: lastAction.data.rotation,
+                            lineType: lastAction.data.lineType,
+                            color: lastAction.data.color,
+                            fillColor: lastAction.data.fillColor
+                        }
+                    });
+
+                    await prisma.History.update({
+                        where: {id: lastAction.id},
+                        lastAction: "add_shape"
+                    });
+                }
+                else if(lastAction.action === 'add_shape'){
+                    await prisma.shape.delete({
+                        where: {id: lastAction.data.id}
+                    });
+
+                    await prisma.History.update({
+                        where: {id: lastAction.id},
+                        lastAction: "deleted_shape"
+                    });
+                }
+                const shapes = await prisma.Shape.findMany({ where: { canvasId } });
+                ws.send(JSON.stringify({ type: 'initialShapes', data: shapes }));
+            }
         }catch(err) {
             console.error('Error processing message:', err);
         }

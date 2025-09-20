@@ -6,7 +6,7 @@ export function useCanvas() {
   return useContext(CanvasContext);
 }
 
-export function CanvasProvider({ children }) {
+export function CanvasProvider({ children}) {
   const [shapes, setShapes] = useState([]);       // all drawn shapes
   const [tool, setTool] = useState("select");     // current tool
   const [color, setColor] = useState("#000");     // stroke/text color
@@ -14,7 +14,8 @@ export function CanvasProvider({ children }) {
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [fontSize, setFontSize] = useState(16);
 
-  // --- helpers to add shapes ---
+ // --- helpers to add shapes ---
+
     const addShape = (shape) => {
         setShapes(prev => [...prev, shape]);
     };
@@ -80,7 +81,8 @@ export function CanvasProvider({ children }) {
         addShape,
         fontSize, setFontSize,
         addRectangle, addCircle, addLine,
-        addArrow, addDiamond, addFreehand, addText
+        addArrow, addDiamond, addFreehand, addText,
+      
       }}
     >
       {children}
