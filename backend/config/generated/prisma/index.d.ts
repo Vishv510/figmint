@@ -89,7 +89,7 @@ export const Role: typeof $Enums.Role
 
 /**
  * ##  Prisma Client ʲˢ
- *
+ * 
  * Type-safe database client for TypeScript & Node.js
  * @example
  * ```
@@ -98,19 +98,19 @@ export const Role: typeof $Enums.Role
  * const users = await prisma.user.findMany()
  * ```
  *
- *
+ * 
  * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
  */
 export class PrismaClient<
   ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
-  const U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
+  U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
   ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
 
     /**
    * ##  Prisma Client ʲˢ
-   *
+   * 
    * Type-safe database client for TypeScript & Node.js
    * @example
    * ```
@@ -119,12 +119,12 @@ export class PrismaClient<
    * const users = await prisma.user.findMany()
    * ```
    *
-   *
+   * 
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
    */
 
   constructor(optionsArg ?: Prisma.Subset<ClientOptions, Prisma.PrismaClientOptions>);
-  $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): PrismaClient;
+  $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): void;
 
   /**
    * Connect with the database
@@ -136,13 +136,20 @@ export class PrismaClient<
    */
   $disconnect(): $Utils.JsPromise<void>;
 
+  /**
+   * Add a middleware
+   * @deprecated since 4.16.0. For new code, prefer client extensions instead.
+   * @see https://pris.ly/d/extensions
+   */
+  $use(cb: Prisma.Middleware): void
+
 /**
    * Executes a prepared raw query and returns the number of affected rows.
    * @example
    * ```
    * const result = await prisma.$executeRaw`UPDATE User SET cool = ${true} WHERE email = ${'user@email.com'};`
    * ```
-   *
+   * 
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $executeRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<number>;
@@ -154,7 +161,7 @@ export class PrismaClient<
    * ```
    * const result = await prisma.$executeRawUnsafe('UPDATE User SET cool = $1 WHERE email = $2 ;', true, 'user@email.com')
    * ```
-   *
+   * 
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $executeRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<number>;
@@ -165,7 +172,7 @@ export class PrismaClient<
    * ```
    * const result = await prisma.$queryRaw`SELECT * FROM User WHERE id = ${1} OR email = ${'user@email.com'};`
    * ```
-   *
+   * 
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<T>;
@@ -177,7 +184,7 @@ export class PrismaClient<
    * ```
    * const result = await prisma.$queryRawUnsafe('SELECT * FROM User WHERE id = $1 OR email = $2;', 1, 'user@email.com')
    * ```
-   *
+   * 
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
   $queryRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<T>;
@@ -201,9 +208,7 @@ export class PrismaClient<
   $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<R>
 
 
-  $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb<ClientOptions>, ExtArgs, $Utils.Call<Prisma.TypeMapCb<ClientOptions>, {
-    extArgs: ExtArgs
-  }>>
+  $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb, ExtArgs>
 
       /**
    * `prisma.user`: Exposes CRUD operations for the **User** model.
@@ -213,7 +218,7 @@ export class PrismaClient<
     * const users = await prisma.user.findMany()
     * ```
     */
-  get user(): Prisma.UserDelegate<ExtArgs, ClientOptions>;
+  get user(): Prisma.UserDelegate<ExtArgs>;
 
   /**
    * `prisma.canvas`: Exposes CRUD operations for the **Canvas** model.
@@ -223,7 +228,7 @@ export class PrismaClient<
     * const canvas = await prisma.canvas.findMany()
     * ```
     */
-  get canvas(): Prisma.CanvasDelegate<ExtArgs, ClientOptions>;
+  get canvas(): Prisma.CanvasDelegate<ExtArgs>;
 
   /**
    * `prisma.shape`: Exposes CRUD operations for the **Shape** model.
@@ -233,7 +238,7 @@ export class PrismaClient<
     * const shapes = await prisma.shape.findMany()
     * ```
     */
-  get shape(): Prisma.ShapeDelegate<ExtArgs, ClientOptions>;
+  get shape(): Prisma.ShapeDelegate<ExtArgs>;
 
   /**
    * `prisma.collaboration`: Exposes CRUD operations for the **Collaboration** model.
@@ -243,7 +248,7 @@ export class PrismaClient<
     * const collaborations = await prisma.collaboration.findMany()
     * ```
     */
-  get collaboration(): Prisma.CollaborationDelegate<ExtArgs, ClientOptions>;
+  get collaboration(): Prisma.CollaborationDelegate<ExtArgs>;
 
   /**
    * `prisma.history`: Exposes CRUD operations for the **History** model.
@@ -253,7 +258,7 @@ export class PrismaClient<
     * const histories = await prisma.history.findMany()
     * ```
     */
-  get history(): Prisma.HistoryDelegate<ExtArgs, ClientOptions>;
+  get history(): Prisma.HistoryDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -274,6 +279,7 @@ export namespace Prisma {
   export import PrismaClientRustPanicError = runtime.PrismaClientRustPanicError
   export import PrismaClientInitializationError = runtime.PrismaClientInitializationError
   export import PrismaClientValidationError = runtime.PrismaClientValidationError
+  export import NotFoundError = runtime.NotFoundError
 
   /**
    * Re-export of sql-template-tag
@@ -294,7 +300,7 @@ export namespace Prisma {
   export type DecimalJsLike = runtime.DecimalJsLike
 
   /**
-   * Metrics
+   * Metrics 
    */
   export type Metrics = runtime.Metrics
   export type Metric<T> = runtime.Metric<T>
@@ -312,14 +318,14 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.14.0
-   * Query Engine version: 717184b7b35ea05dfa71a3236b7af656013e1e49
+   * Prisma Client JS version: 5.22.0
+   * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
    */
   export type PrismaVersion = {
     client: string
   }
 
-  export const prismaVersion: PrismaVersion
+  export const prismaVersion: PrismaVersion 
 
   /**
    * Utility Types
@@ -335,15 +341,15 @@ export namespace Prisma {
 
   /**
    * Types of the values used to represent different kinds of `null` values when working with JSON fields.
-   *
+   * 
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   namespace NullTypes {
     /**
     * Type of `Prisma.DbNull`.
-    *
+    * 
     * You cannot use other instances of this class. Please use the `Prisma.DbNull` value.
-    *
+    * 
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class DbNull {
@@ -353,9 +359,9 @@ export namespace Prisma {
 
     /**
     * Type of `Prisma.JsonNull`.
-    *
+    * 
     * You cannot use other instances of this class. Please use the `Prisma.JsonNull` value.
-    *
+    * 
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class JsonNull {
@@ -365,9 +371,9 @@ export namespace Prisma {
 
     /**
     * Type of `Prisma.AnyNull`.
-    *
+    * 
     * You cannot use other instances of this class. Please use the `Prisma.AnyNull` value.
-    *
+    * 
     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
     */
     class AnyNull {
@@ -378,21 +384,21 @@ export namespace Prisma {
 
   /**
    * Helper for filtering JSON entries that have `null` on the database (empty on the db)
-   *
+   * 
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const DbNull: NullTypes.DbNull
 
   /**
    * Helper for filtering JSON entries that have JSON `null` values (not empty on the db)
-   *
+   * 
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const JsonNull: NullTypes.JsonNull
 
   /**
    * Helper for filtering JSON entries that are `Prisma.DbNull` or `Prisma.JsonNull`
-   *
+   * 
    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
    */
   export const AnyNull: NullTypes.AnyNull
@@ -580,7 +586,7 @@ export namespace Prisma {
   type AtLeast<O extends object, K extends string> = NoExpand<
     O extends unknown
     ? | (K extends keyof O ? { [P in K]: O[P] } & O : O)
-      | {[P in keyof O as P extends K ? P : never]-?: O[P]} & O
+      | {[P in keyof O as P extends K ? K : never]-?: O[P]} & O
     : never>;
 
   type _Strict<U, _U = U> = U extends unknown ? U & OptionalFlat<_Record<Exclude<Keys<_U>, keyof U>, never>> : never;
@@ -708,14 +714,11 @@ export namespace Prisma {
     db?: Datasource
   }
 
-  interface TypeMapCb<ClientOptions = {}> extends $Utils.Fn<{extArgs: $Extensions.InternalArgs }, $Utils.Record<string, any>> {
-    returns: Prisma.TypeMap<this['params']['extArgs'], ClientOptions extends { omit: infer OmitOptions } ? OmitOptions : {}>
+  interface TypeMapCb extends $Utils.Fn<{extArgs: $Extensions.InternalArgs, clientOptions: PrismaClientOptions }, $Utils.Record<string, any>> {
+    returns: Prisma.TypeMap<this['params']['extArgs'], this['params']['clientOptions']>
   }
 
-  export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
-    globalOmitOptions: {
-      omit: GlobalOmitOptions
-    }
+  export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
       modelProps: "user" | "canvas" | "shape" | "collaboration" | "history"
       txIsolationLevel: Prisma.TransactionIsolationLevel
@@ -772,10 +775,6 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.UserUpdateManyArgs<ExtArgs>
             result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.UserUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload>[]
           }
           upsert: {
             args: Prisma.UserUpsertArgs<ExtArgs>
@@ -847,10 +846,6 @@ export namespace Prisma {
             args: Prisma.CanvasUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.CanvasUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CanvasPayload>[]
-          }
           upsert: {
             args: Prisma.CanvasUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$CanvasPayload>
@@ -920,10 +915,6 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ShapeUpdateManyArgs<ExtArgs>
             result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.ShapeUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ShapePayload>[]
           }
           upsert: {
             args: Prisma.ShapeUpsertArgs<ExtArgs>
@@ -995,10 +986,6 @@ export namespace Prisma {
             args: Prisma.CollaborationUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.CollaborationUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CollaborationPayload>[]
-          }
           upsert: {
             args: Prisma.CollaborationUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$CollaborationPayload>
@@ -1069,10 +1056,6 @@ export namespace Prisma {
             args: Prisma.HistoryUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.HistoryUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$HistoryPayload>[]
-          }
           upsert: {
             args: Prisma.HistoryUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$HistoryPayload>
@@ -1134,24 +1117,16 @@ export namespace Prisma {
     /**
      * @example
      * ```
-     * // Shorthand for `emit: 'stdout'`
+     * // Defaults to stdout
      * log: ['query', 'info', 'warn', 'error']
      * 
-     * // Emit as events only
+     * // Emit as events
      * log: [
-     *   { emit: 'event', level: 'query' },
-     *   { emit: 'event', level: 'info' },
-     *   { emit: 'event', level: 'warn' }
-     *   { emit: 'event', level: 'error' }
+     *   { emit: 'stdout', level: 'query' },
+     *   { emit: 'stdout', level: 'info' },
+     *   { emit: 'stdout', level: 'warn' }
+     *   { emit: 'stdout', level: 'error' }
      * ]
-     * 
-     * / Emit as events and log to stdout
-     * og: [
-     *  { emit: 'stdout', level: 'query' },
-     *  { emit: 'stdout', level: 'info' },
-     *  { emit: 'stdout', level: 'warn' }
-     *  { emit: 'stdout', level: 'error' }
-     * 
      * ```
      * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/logging#the-log-option).
      */
@@ -1166,29 +1141,8 @@ export namespace Prisma {
       timeout?: number
       isolationLevel?: Prisma.TransactionIsolationLevel
     }
-    /**
-     * Global configuration for omitting model fields by default.
-     * 
-     * @example
-     * ```
-     * const prisma = new PrismaClient({
-     *   omit: {
-     *     user: {
-     *       password: true
-     *     }
-     *   }
-     * })
-     * ```
-     */
-    omit?: Prisma.GlobalOmitConfig
   }
-  export type GlobalOmitConfig = {
-    user?: UserOmit
-    canvas?: CanvasOmit
-    shape?: ShapeOmit
-    collaboration?: CollaborationOmit
-    history?: HistoryOmit
-  }
+
 
   /* Types for Logging */
   export type LogLevel = 'info' | 'query' | 'warn' | 'error'
@@ -1197,15 +1151,10 @@ export namespace Prisma {
     emit: 'stdout' | 'event'
   }
 
-  export type CheckIsLogLevel<T> = T extends LogLevel ? T : never;
-
-  export type GetLogType<T> = CheckIsLogLevel<
-    T extends LogDefinition ? T['level'] : T
-  >;
-
-  export type GetEvents<T extends any[]> = T extends Array<LogLevel | LogDefinition>
-    ? GetLogType<T[number]>
-    : never;
+  export type GetLogType<T extends LogLevel | LogDefinition> = T extends LogDefinition ? T['emit'] extends 'event' ? T['level'] : never : never
+  export type GetEvents<T extends any> = T extends Array<LogLevel | LogDefinition> ?
+    GetLogType<T[0]> | GetLogType<T[1]> | GetLogType<T[2]> | GetLogType<T[3]>
+    : never
 
   export type QueryEvent = {
     timestamp: Date
@@ -1234,7 +1183,6 @@ export namespace Prisma {
     | 'createManyAndReturn'
     | 'update'
     | 'updateMany'
-    | 'updateManyAndReturn'
     | 'upsert'
     | 'delete'
     | 'deleteMany'
@@ -1245,6 +1193,25 @@ export namespace Prisma {
     | 'runCommandRaw'
     | 'findRaw'
     | 'groupBy'
+
+  /**
+   * These options are being passed into the middleware as "params"
+   */
+  export type MiddlewareParams = {
+    model?: ModelName
+    action: PrismaAction
+    args: any
+    dataPath: string[]
+    runInTransaction: boolean
+  }
+
+  /**
+   * The `T` type makes sure, that the `return proceed` is not forgotten in the middleware implementation
+   */
+  export type Middleware<T = any> = (
+    params: MiddlewareParams,
+    next: (params: MiddlewareParams) => $Utils.JsPromise<T>,
+  ) => $Utils.JsPromise<T>
 
   // tested in getLogLevel.test.ts
   export function getLogLevel(log: Array<LogLevel | LogDefinition>): LogLevel | undefined;
@@ -1268,12 +1235,10 @@ export namespace Prisma {
    */
 
   export type UserCountOutputType = {
-    canvases: number
     collaborations: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    canvases?: boolean | UserCountOutputTypeCountCanvasesArgs
     collaborations?: boolean | UserCountOutputTypeCountCollaborationsArgs
   }
 
@@ -1291,13 +1256,6 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountCanvasesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CanvasWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
   export type UserCountOutputTypeCountCollaborationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CollaborationWhereInput
   }
@@ -1308,15 +1266,15 @@ export namespace Prisma {
    */
 
   export type CanvasCountOutputType = {
-    shapes: number
     collaborators: number
     history: number
+    shapes: number
   }
 
   export type CanvasCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    shapes?: boolean | CanvasCountOutputTypeCountShapesArgs
     collaborators?: boolean | CanvasCountOutputTypeCountCollaboratorsArgs
     history?: boolean | CanvasCountOutputTypeCountHistoryArgs
+    shapes?: boolean | CanvasCountOutputTypeCountShapesArgs
   }
 
   // Custom InputTypes
@@ -1333,13 +1291,6 @@ export namespace Prisma {
   /**
    * CanvasCountOutputType without action
    */
-  export type CanvasCountOutputTypeCountShapesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: ShapeWhereInput
-  }
-
-  /**
-   * CanvasCountOutputType without action
-   */
   export type CanvasCountOutputTypeCountCollaboratorsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CollaborationWhereInput
   }
@@ -1349,6 +1300,13 @@ export namespace Prisma {
    */
   export type CanvasCountOutputTypeCountHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: HistoryWhereInput
+  }
+
+  /**
+   * CanvasCountOutputType without action
+   */
+  export type CanvasCountOutputTypeCountShapesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ShapeWhereInput
   }
 
 
@@ -1542,15 +1500,6 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
 
-  export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    username?: boolean
-    email?: boolean
-    password?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }, ExtArgs["result"]["user"]>
-
   export type UserSelectScalar = {
     id?: boolean
     username?: boolean
@@ -1560,19 +1509,17 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "username" | "email" | "password" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     canvases?: boolean | User$canvasesArgs<ExtArgs>
     collaborations?: boolean | User$collaborationsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
     objects: {
-      canvases: Prisma.$CanvasPayload<ExtArgs>[]
+      canvases: Prisma.$CanvasPayload<ExtArgs> | null
       collaborations: Prisma.$CollaborationPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -1588,12 +1535,12 @@ export namespace Prisma {
 
   type UserGetPayload<S extends boolean | null | undefined | UserDefaultArgs> = $Result.GetResult<Prisma.$UserPayload, S>
 
-  type UserCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<UserFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+  type UserCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<UserFindManyArgs, 'select' | 'include' | 'distinct'> & {
       select?: UserCountAggregateInputType | true
     }
 
-  export interface UserDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+  export interface UserDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['User'], meta: { name: 'User' } }
     /**
      * Find zero or one User that matches the filter.
@@ -1606,10 +1553,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends UserFindUniqueArgs>(args: SelectSubset<T, UserFindUniqueArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends UserFindUniqueArgs>(args: SelectSubset<T, UserFindUniqueArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one User that matches the filter or throw an error with `error.code='P2025'`
+     * Find one User that matches the filter or throw an error with `error.code='P2025'` 
      * if no matches were found.
      * @param {UserFindUniqueOrThrowArgs} args - Arguments to find a User
      * @example
@@ -1620,7 +1567,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends UserFindUniqueOrThrowArgs>(args: SelectSubset<T, UserFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends UserFindUniqueOrThrowArgs>(args: SelectSubset<T, UserFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first User that matches the filter.
@@ -1635,7 +1582,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends UserFindFirstArgs>(args?: SelectSubset<T, UserFindFirstArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends UserFindFirstArgs>(args?: SelectSubset<T, UserFindFirstArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first User that matches the filter or
@@ -1651,7 +1598,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends UserFindFirstOrThrowArgs>(args?: SelectSubset<T, UserFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends UserFindFirstOrThrowArgs>(args?: SelectSubset<T, UserFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Users that matches the filter.
@@ -1669,7 +1616,7 @@ export namespace Prisma {
      * const userWithIdOnly = await prisma.user.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends UserFindManyArgs>(args?: SelectSubset<T, UserFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends UserFindManyArgs>(args?: SelectSubset<T, UserFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a User.
@@ -1683,7 +1630,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends UserCreateArgs>(args: SelectSubset<T, UserCreateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends UserCreateArgs>(args: SelectSubset<T, UserCreateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Users.
@@ -1711,7 +1658,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many Users and only return the `id`
-     * const userWithIdOnly = await prisma.user.createManyAndReturn({
+     * const userWithIdOnly = await prisma.user.createManyAndReturn({ 
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -1721,7 +1668,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends UserCreateManyAndReturnArgs>(args?: SelectSubset<T, UserCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends UserCreateManyAndReturnArgs>(args?: SelectSubset<T, UserCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a User.
@@ -1735,7 +1682,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends UserDeleteArgs>(args: SelectSubset<T, UserDeleteArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends UserDeleteArgs>(args: SelectSubset<T, UserDeleteArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one User.
@@ -1752,7 +1699,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends UserUpdateArgs>(args: SelectSubset<T, UserUpdateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends UserUpdateArgs>(args: SelectSubset<T, UserUpdateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Users.
@@ -1788,36 +1735,6 @@ export namespace Prisma {
     updateMany<T extends UserUpdateManyArgs>(args: SelectSubset<T, UserUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Users and returns the data updated in the database.
-     * @param {UserUpdateManyAndReturnArgs} args - Arguments to update many Users.
-     * @example
-     * // Update many Users
-     * const user = await prisma.user.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Users and only return the `id`
-     * const userWithIdOnly = await prisma.user.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends UserUpdateManyAndReturnArgs>(args: SelectSubset<T, UserUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one User.
      * @param {UserUpsertArgs} args - Arguments to update or create a User.
      * @example
@@ -1834,7 +1751,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends UserUpsertArgs>(args: SelectSubset<T, UserUpsertArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends UserUpsertArgs>(args: SelectSubset<T, UserUpsertArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
 
 
     /**
@@ -1974,10 +1891,10 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    canvases<T extends User$canvasesArgs<ExtArgs> = {}>(args?: Subset<T, User$canvasesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    collaborations<T extends User$collaborationsArgs<ExtArgs> = {}>(args?: Subset<T, User$collaborationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    canvases<T extends User$canvasesArgs<ExtArgs> = {}>(args?: Subset<T, User$canvasesArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    collaborations<T extends User$collaborationsArgs<ExtArgs> = {}>(args?: Subset<T, User$collaborationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2005,7 +1922,7 @@ export namespace Prisma {
 
   /**
    * Fields of the User model
-   */
+   */ 
   interface UserFieldRefs {
     readonly id: FieldRef<"User", 'String'>
     readonly username: FieldRef<"User", 'String'>
@@ -2026,10 +1943,6 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
@@ -2048,10 +1961,6 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
@@ -2069,10 +1978,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the User
      */
     select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2122,10 +2027,6 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
@@ -2174,10 +2075,6 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
@@ -2221,10 +2118,6 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
@@ -2254,10 +2147,6 @@ export namespace Prisma {
      */
     select?: UserSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
      * The data used to create many Users.
      */
     data: UserCreateManyInput | UserCreateManyInput[]
@@ -2272,10 +2161,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the User
      */
     select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2302,36 +2187,6 @@ export namespace Prisma {
      * Filter which Users to update
      */
     where?: UserWhereInput
-    /**
-     * Limit how many Users to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * User updateManyAndReturn
-   */
-  export type UserUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * The data used to update Users.
-     */
-    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyInput>
-    /**
-     * Filter which Users to update
-     */
-    where?: UserWhereInput
-    /**
-     * Limit how many Users to update.
-     */
-    limit?: number
   }
 
   /**
@@ -2342,10 +2197,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the User
      */
     select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2373,10 +2224,6 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
@@ -2394,10 +2241,6 @@ export namespace Prisma {
      * Filter which Users to delete
      */
     where?: UserWhereInput
-    /**
-     * Limit how many Users to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -2409,19 +2252,10 @@ export namespace Prisma {
      */
     select?: CanvasSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Canvas
-     */
-    omit?: CanvasOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: CanvasInclude<ExtArgs> | null
     where?: CanvasWhereInput
-    orderBy?: CanvasOrderByWithRelationInput | CanvasOrderByWithRelationInput[]
-    cursor?: CanvasWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CanvasScalarFieldEnum | CanvasScalarFieldEnum[]
   }
 
   /**
@@ -2432,10 +2266,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the Collaboration
      */
     select?: CollaborationSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Collaboration
-     */
-    omit?: CollaborationOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2456,10 +2286,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the User
      */
     select?: UserSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -2714,27 +2540,13 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
-    shapes?: boolean | Canvas$shapesArgs<ExtArgs>
     collaborators?: boolean | Canvas$collaboratorsArgs<ExtArgs>
     history?: boolean | Canvas$historyArgs<ExtArgs>
+    shapes?: boolean | Canvas$shapesArgs<ExtArgs>
     _count?: boolean | CanvasCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["canvas"]>
 
   export type CanvasSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    ownerId?: boolean
-    zoomLevel?: boolean
-    panX?: boolean
-    panY?: boolean
-    isReadOnly?: boolean
-    shareToken?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    owner?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["canvas"]>
-
-  export type CanvasSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
     ownerId?: boolean
@@ -2761,18 +2573,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type CanvasOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "ownerId" | "zoomLevel" | "panX" | "panY" | "isReadOnly" | "shareToken" | "createdAt" | "updatedAt", ExtArgs["result"]["canvas"]>
   export type CanvasInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
-    shapes?: boolean | Canvas$shapesArgs<ExtArgs>
     collaborators?: boolean | Canvas$collaboratorsArgs<ExtArgs>
     history?: boolean | Canvas$historyArgs<ExtArgs>
+    shapes?: boolean | Canvas$shapesArgs<ExtArgs>
     _count?: boolean | CanvasCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CanvasIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    owner?: boolean | UserDefaultArgs<ExtArgs>
-  }
-  export type CanvasIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
   }
 
@@ -2780,9 +2588,9 @@ export namespace Prisma {
     name: "Canvas"
     objects: {
       owner: Prisma.$UserPayload<ExtArgs>
-      shapes: Prisma.$ShapePayload<ExtArgs>[]
       collaborators: Prisma.$CollaborationPayload<ExtArgs>[]
       history: Prisma.$HistoryPayload<ExtArgs>[]
+      shapes: Prisma.$ShapePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -2801,12 +2609,12 @@ export namespace Prisma {
 
   type CanvasGetPayload<S extends boolean | null | undefined | CanvasDefaultArgs> = $Result.GetResult<Prisma.$CanvasPayload, S>
 
-  type CanvasCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<CanvasFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+  type CanvasCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<CanvasFindManyArgs, 'select' | 'include' | 'distinct'> & {
       select?: CanvasCountAggregateInputType | true
     }
 
-  export interface CanvasDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+  export interface CanvasDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Canvas'], meta: { name: 'Canvas' } }
     /**
      * Find zero or one Canvas that matches the filter.
@@ -2819,10 +2627,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends CanvasFindUniqueArgs>(args: SelectSubset<T, CanvasFindUniqueArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends CanvasFindUniqueArgs>(args: SelectSubset<T, CanvasFindUniqueArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Canvas that matches the filter or throw an error with `error.code='P2025'`
+     * Find one Canvas that matches the filter or throw an error with `error.code='P2025'` 
      * if no matches were found.
      * @param {CanvasFindUniqueOrThrowArgs} args - Arguments to find a Canvas
      * @example
@@ -2833,7 +2641,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends CanvasFindUniqueOrThrowArgs>(args: SelectSubset<T, CanvasFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends CanvasFindUniqueOrThrowArgs>(args: SelectSubset<T, CanvasFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Canvas that matches the filter.
@@ -2848,7 +2656,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends CanvasFindFirstArgs>(args?: SelectSubset<T, CanvasFindFirstArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends CanvasFindFirstArgs>(args?: SelectSubset<T, CanvasFindFirstArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Canvas that matches the filter or
@@ -2864,7 +2672,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends CanvasFindFirstOrThrowArgs>(args?: SelectSubset<T, CanvasFindFirstOrThrowArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends CanvasFindFirstOrThrowArgs>(args?: SelectSubset<T, CanvasFindFirstOrThrowArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Canvas that matches the filter.
@@ -2882,7 +2690,7 @@ export namespace Prisma {
      * const canvasWithIdOnly = await prisma.canvas.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends CanvasFindManyArgs>(args?: SelectSubset<T, CanvasFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends CanvasFindManyArgs>(args?: SelectSubset<T, CanvasFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Canvas.
@@ -2896,7 +2704,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends CanvasCreateArgs>(args: SelectSubset<T, CanvasCreateArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends CanvasCreateArgs>(args: SelectSubset<T, CanvasCreateArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Canvas.
@@ -2924,7 +2732,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many Canvas and only return the `id`
-     * const canvasWithIdOnly = await prisma.canvas.createManyAndReturn({
+     * const canvasWithIdOnly = await prisma.canvas.createManyAndReturn({ 
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -2934,7 +2742,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends CanvasCreateManyAndReturnArgs>(args?: SelectSubset<T, CanvasCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends CanvasCreateManyAndReturnArgs>(args?: SelectSubset<T, CanvasCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Canvas.
@@ -2948,7 +2756,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends CanvasDeleteArgs>(args: SelectSubset<T, CanvasDeleteArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends CanvasDeleteArgs>(args: SelectSubset<T, CanvasDeleteArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Canvas.
@@ -2965,7 +2773,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends CanvasUpdateArgs>(args: SelectSubset<T, CanvasUpdateArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends CanvasUpdateArgs>(args: SelectSubset<T, CanvasUpdateArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Canvas.
@@ -3001,36 +2809,6 @@ export namespace Prisma {
     updateMany<T extends CanvasUpdateManyArgs>(args: SelectSubset<T, CanvasUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Canvas and returns the data updated in the database.
-     * @param {CanvasUpdateManyAndReturnArgs} args - Arguments to update many Canvas.
-     * @example
-     * // Update many Canvas
-     * const canvas = await prisma.canvas.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Canvas and only return the `id`
-     * const canvasWithIdOnly = await prisma.canvas.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends CanvasUpdateManyAndReturnArgs>(args: SelectSubset<T, CanvasUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one Canvas.
      * @param {CanvasUpsertArgs} args - Arguments to update or create a Canvas.
      * @example
@@ -3047,7 +2825,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends CanvasUpsertArgs>(args: SelectSubset<T, CanvasUpsertArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends CanvasUpsertArgs>(args: SelectSubset<T, CanvasUpsertArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
 
 
     /**
@@ -3187,12 +2965,12 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__CanvasClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__CanvasClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    owner<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    shapes<T extends Canvas$shapesArgs<ExtArgs> = {}>(args?: Subset<T, Canvas$shapesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    collaborators<T extends Canvas$collaboratorsArgs<ExtArgs> = {}>(args?: Subset<T, Canvas$collaboratorsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    history<T extends Canvas$historyArgs<ExtArgs> = {}>(args?: Subset<T, Canvas$historyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    owner<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    collaborators<T extends Canvas$collaboratorsArgs<ExtArgs> = {}>(args?: Subset<T, Canvas$collaboratorsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "findMany"> | Null>
+    history<T extends Canvas$historyArgs<ExtArgs> = {}>(args?: Subset<T, Canvas$historyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "findMany"> | Null>
+    shapes<T extends Canvas$shapesArgs<ExtArgs> = {}>(args?: Subset<T, Canvas$shapesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3220,7 +2998,7 @@ export namespace Prisma {
 
   /**
    * Fields of the Canvas model
-   */
+   */ 
   interface CanvasFieldRefs {
     readonly id: FieldRef<"Canvas", 'String'>
     readonly name: FieldRef<"Canvas", 'String'>
@@ -3245,10 +3023,6 @@ export namespace Prisma {
      */
     select?: CanvasSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Canvas
-     */
-    omit?: CanvasOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: CanvasInclude<ExtArgs> | null
@@ -3267,10 +3041,6 @@ export namespace Prisma {
      */
     select?: CanvasSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Canvas
-     */
-    omit?: CanvasOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: CanvasInclude<ExtArgs> | null
@@ -3288,10 +3058,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the Canvas
      */
     select?: CanvasSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Canvas
-     */
-    omit?: CanvasOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -3341,10 +3107,6 @@ export namespace Prisma {
      */
     select?: CanvasSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Canvas
-     */
-    omit?: CanvasOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: CanvasInclude<ExtArgs> | null
@@ -3393,10 +3155,6 @@ export namespace Prisma {
      */
     select?: CanvasSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Canvas
-     */
-    omit?: CanvasOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: CanvasInclude<ExtArgs> | null
@@ -3440,10 +3198,6 @@ export namespace Prisma {
      */
     select?: CanvasSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Canvas
-     */
-    omit?: CanvasOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: CanvasInclude<ExtArgs> | null
@@ -3473,10 +3227,6 @@ export namespace Prisma {
      */
     select?: CanvasSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the Canvas
-     */
-    omit?: CanvasOmit<ExtArgs> | null
-    /**
      * The data used to create many Canvas.
      */
     data: CanvasCreateManyInput | CanvasCreateManyInput[]
@@ -3495,10 +3245,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the Canvas
      */
     select?: CanvasSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Canvas
-     */
-    omit?: CanvasOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -3525,40 +3271,6 @@ export namespace Prisma {
      * Filter which Canvas to update
      */
     where?: CanvasWhereInput
-    /**
-     * Limit how many Canvas to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Canvas updateManyAndReturn
-   */
-  export type CanvasUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Canvas
-     */
-    select?: CanvasSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Canvas
-     */
-    omit?: CanvasOmit<ExtArgs> | null
-    /**
-     * The data used to update Canvas.
-     */
-    data: XOR<CanvasUpdateManyMutationInput, CanvasUncheckedUpdateManyInput>
-    /**
-     * Filter which Canvas to update
-     */
-    where?: CanvasWhereInput
-    /**
-     * Limit how many Canvas to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CanvasIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -3569,10 +3281,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the Canvas
      */
     select?: CanvasSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Canvas
-     */
-    omit?: CanvasOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -3600,10 +3308,6 @@ export namespace Prisma {
      */
     select?: CanvasSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Canvas
-     */
-    omit?: CanvasOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: CanvasInclude<ExtArgs> | null
@@ -3621,34 +3325,6 @@ export namespace Prisma {
      * Filter which Canvas to delete
      */
     where?: CanvasWhereInput
-    /**
-     * Limit how many Canvas to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * Canvas.shapes
-   */
-  export type Canvas$shapesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Shape
-     */
-    select?: ShapeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Shape
-     */
-    omit?: ShapeOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ShapeInclude<ExtArgs> | null
-    where?: ShapeWhereInput
-    orderBy?: ShapeOrderByWithRelationInput | ShapeOrderByWithRelationInput[]
-    cursor?: ShapeWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ShapeScalarFieldEnum | ShapeScalarFieldEnum[]
   }
 
   /**
@@ -3659,10 +3335,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the Collaboration
      */
     select?: CollaborationSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Collaboration
-     */
-    omit?: CollaborationOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -3684,10 +3356,6 @@ export namespace Prisma {
      */
     select?: HistorySelect<ExtArgs> | null
     /**
-     * Omit specific fields from the History
-     */
-    omit?: HistoryOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: HistoryInclude<ExtArgs> | null
@@ -3700,6 +3368,26 @@ export namespace Prisma {
   }
 
   /**
+   * Canvas.shapes
+   */
+  export type Canvas$shapesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Shape
+     */
+    select?: ShapeSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ShapeInclude<ExtArgs> | null
+    where?: ShapeWhereInput
+    orderBy?: ShapeOrderByWithRelationInput | ShapeOrderByWithRelationInput[]
+    cursor?: ShapeWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ShapeScalarFieldEnum | ShapeScalarFieldEnum[]
+  }
+
+  /**
    * Canvas without action
    */
   export type CanvasDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3707,10 +3395,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the Canvas
      */
     select?: CanvasSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Canvas
-     */
-    omit?: CanvasOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -4034,25 +3718,6 @@ export namespace Prisma {
     canvas?: boolean | CanvasDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["shape"]>
 
-  export type ShapeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    canvasId?: boolean
-    type?: boolean
-    x?: boolean
-    y?: boolean
-    width?: boolean
-    height?: boolean
-    radius?: boolean
-    points?: boolean
-    rotation?: boolean
-    lineType?: boolean
-    color?: boolean
-    fillColor?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    canvas?: boolean | CanvasDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["shape"]>
-
   export type ShapeSelectScalar = {
     id?: boolean
     canvasId?: boolean
@@ -4071,14 +3736,10 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ShapeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "canvasId" | "type" | "x" | "y" | "width" | "height" | "radius" | "points" | "rotation" | "lineType" | "color" | "fillColor" | "createdAt" | "updatedAt", ExtArgs["result"]["shape"]>
   export type ShapeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     canvas?: boolean | CanvasDefaultArgs<ExtArgs>
   }
   export type ShapeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    canvas?: boolean | CanvasDefaultArgs<ExtArgs>
-  }
-  export type ShapeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     canvas?: boolean | CanvasDefaultArgs<ExtArgs>
   }
 
@@ -4109,12 +3770,12 @@ export namespace Prisma {
 
   type ShapeGetPayload<S extends boolean | null | undefined | ShapeDefaultArgs> = $Result.GetResult<Prisma.$ShapePayload, S>
 
-  type ShapeCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<ShapeFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+  type ShapeCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<ShapeFindManyArgs, 'select' | 'include' | 'distinct'> & {
       select?: ShapeCountAggregateInputType | true
     }
 
-  export interface ShapeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+  export interface ShapeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Shape'], meta: { name: 'Shape' } }
     /**
      * Find zero or one Shape that matches the filter.
@@ -4127,10 +3788,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends ShapeFindUniqueArgs>(args: SelectSubset<T, ShapeFindUniqueArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends ShapeFindUniqueArgs>(args: SelectSubset<T, ShapeFindUniqueArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Shape that matches the filter or throw an error with `error.code='P2025'`
+     * Find one Shape that matches the filter or throw an error with `error.code='P2025'` 
      * if no matches were found.
      * @param {ShapeFindUniqueOrThrowArgs} args - Arguments to find a Shape
      * @example
@@ -4141,7 +3802,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends ShapeFindUniqueOrThrowArgs>(args: SelectSubset<T, ShapeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends ShapeFindUniqueOrThrowArgs>(args: SelectSubset<T, ShapeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Shape that matches the filter.
@@ -4156,7 +3817,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends ShapeFindFirstArgs>(args?: SelectSubset<T, ShapeFindFirstArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends ShapeFindFirstArgs>(args?: SelectSubset<T, ShapeFindFirstArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Shape that matches the filter or
@@ -4172,7 +3833,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends ShapeFindFirstOrThrowArgs>(args?: SelectSubset<T, ShapeFindFirstOrThrowArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends ShapeFindFirstOrThrowArgs>(args?: SelectSubset<T, ShapeFindFirstOrThrowArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Shapes that matches the filter.
@@ -4190,7 +3851,7 @@ export namespace Prisma {
      * const shapeWithIdOnly = await prisma.shape.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends ShapeFindManyArgs>(args?: SelectSubset<T, ShapeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends ShapeFindManyArgs>(args?: SelectSubset<T, ShapeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Shape.
@@ -4204,7 +3865,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends ShapeCreateArgs>(args: SelectSubset<T, ShapeCreateArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends ShapeCreateArgs>(args: SelectSubset<T, ShapeCreateArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Shapes.
@@ -4232,7 +3893,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many Shapes and only return the `id`
-     * const shapeWithIdOnly = await prisma.shape.createManyAndReturn({
+     * const shapeWithIdOnly = await prisma.shape.createManyAndReturn({ 
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -4242,7 +3903,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends ShapeCreateManyAndReturnArgs>(args?: SelectSubset<T, ShapeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends ShapeCreateManyAndReturnArgs>(args?: SelectSubset<T, ShapeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Shape.
@@ -4256,7 +3917,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends ShapeDeleteArgs>(args: SelectSubset<T, ShapeDeleteArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends ShapeDeleteArgs>(args: SelectSubset<T, ShapeDeleteArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Shape.
@@ -4273,7 +3934,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends ShapeUpdateArgs>(args: SelectSubset<T, ShapeUpdateArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends ShapeUpdateArgs>(args: SelectSubset<T, ShapeUpdateArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Shapes.
@@ -4309,36 +3970,6 @@ export namespace Prisma {
     updateMany<T extends ShapeUpdateManyArgs>(args: SelectSubset<T, ShapeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Shapes and returns the data updated in the database.
-     * @param {ShapeUpdateManyAndReturnArgs} args - Arguments to update many Shapes.
-     * @example
-     * // Update many Shapes
-     * const shape = await prisma.shape.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Shapes and only return the `id`
-     * const shapeWithIdOnly = await prisma.shape.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends ShapeUpdateManyAndReturnArgs>(args: SelectSubset<T, ShapeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one Shape.
      * @param {ShapeUpsertArgs} args - Arguments to update or create a Shape.
      * @example
@@ -4355,7 +3986,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends ShapeUpsertArgs>(args: SelectSubset<T, ShapeUpsertArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends ShapeUpsertArgs>(args: SelectSubset<T, ShapeUpsertArgs<ExtArgs>>): Prisma__ShapeClient<$Result.GetResult<Prisma.$ShapePayload<ExtArgs>, T, "upsert">, never, ExtArgs>
 
 
     /**
@@ -4495,9 +4126,9 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__ShapeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__ShapeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    canvas<T extends CanvasDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CanvasDefaultArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    canvas<T extends CanvasDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CanvasDefaultArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4525,7 +4156,7 @@ export namespace Prisma {
 
   /**
    * Fields of the Shape model
-   */
+   */ 
   interface ShapeFieldRefs {
     readonly id: FieldRef<"Shape", 'String'>
     readonly canvasId: FieldRef<"Shape", 'String'>
@@ -4555,10 +4186,6 @@ export namespace Prisma {
      */
     select?: ShapeSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Shape
-     */
-    omit?: ShapeOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ShapeInclude<ExtArgs> | null
@@ -4577,10 +4204,6 @@ export namespace Prisma {
      */
     select?: ShapeSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Shape
-     */
-    omit?: ShapeOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ShapeInclude<ExtArgs> | null
@@ -4598,10 +4221,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the Shape
      */
     select?: ShapeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Shape
-     */
-    omit?: ShapeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -4651,10 +4270,6 @@ export namespace Prisma {
      */
     select?: ShapeSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Shape
-     */
-    omit?: ShapeOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ShapeInclude<ExtArgs> | null
@@ -4703,10 +4318,6 @@ export namespace Prisma {
      */
     select?: ShapeSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Shape
-     */
-    omit?: ShapeOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ShapeInclude<ExtArgs> | null
@@ -4750,10 +4361,6 @@ export namespace Prisma {
      */
     select?: ShapeSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Shape
-     */
-    omit?: ShapeOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ShapeInclude<ExtArgs> | null
@@ -4783,10 +4390,6 @@ export namespace Prisma {
      */
     select?: ShapeSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the Shape
-     */
-    omit?: ShapeOmit<ExtArgs> | null
-    /**
      * The data used to create many Shapes.
      */
     data: ShapeCreateManyInput | ShapeCreateManyInput[]
@@ -4805,10 +4408,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the Shape
      */
     select?: ShapeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Shape
-     */
-    omit?: ShapeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -4835,40 +4434,6 @@ export namespace Prisma {
      * Filter which Shapes to update
      */
     where?: ShapeWhereInput
-    /**
-     * Limit how many Shapes to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Shape updateManyAndReturn
-   */
-  export type ShapeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Shape
-     */
-    select?: ShapeSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Shape
-     */
-    omit?: ShapeOmit<ExtArgs> | null
-    /**
-     * The data used to update Shapes.
-     */
-    data: XOR<ShapeUpdateManyMutationInput, ShapeUncheckedUpdateManyInput>
-    /**
-     * Filter which Shapes to update
-     */
-    where?: ShapeWhereInput
-    /**
-     * Limit how many Shapes to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ShapeIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4879,10 +4444,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the Shape
      */
     select?: ShapeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Shape
-     */
-    omit?: ShapeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -4910,10 +4471,6 @@ export namespace Prisma {
      */
     select?: ShapeSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Shape
-     */
-    omit?: ShapeOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: ShapeInclude<ExtArgs> | null
@@ -4931,10 +4488,6 @@ export namespace Prisma {
      * Filter which Shapes to delete
      */
     where?: ShapeWhereInput
-    /**
-     * Limit how many Shapes to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -4945,10 +4498,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the Shape
      */
     select?: ShapeSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Shape
-     */
-    omit?: ShapeOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -5134,16 +4683,6 @@ export namespace Prisma {
     users?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["collaboration"]>
 
-  export type CollaborationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    canvasId?: boolean
-    userId?: boolean
-    role?: boolean
-    joinedAt?: boolean
-    canvas?: boolean | CanvasDefaultArgs<ExtArgs>
-    users?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["collaboration"]>
-
   export type CollaborationSelectScalar = {
     id?: boolean
     canvasId?: boolean
@@ -5152,16 +4691,11 @@ export namespace Prisma {
     joinedAt?: boolean
   }
 
-  export type CollaborationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "canvasId" | "userId" | "role" | "joinedAt", ExtArgs["result"]["collaboration"]>
   export type CollaborationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     canvas?: boolean | CanvasDefaultArgs<ExtArgs>
     users?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type CollaborationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    canvas?: boolean | CanvasDefaultArgs<ExtArgs>
-    users?: boolean | UserDefaultArgs<ExtArgs>
-  }
-  export type CollaborationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     canvas?: boolean | CanvasDefaultArgs<ExtArgs>
     users?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -5184,12 +4718,12 @@ export namespace Prisma {
 
   type CollaborationGetPayload<S extends boolean | null | undefined | CollaborationDefaultArgs> = $Result.GetResult<Prisma.$CollaborationPayload, S>
 
-  type CollaborationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<CollaborationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+  type CollaborationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<CollaborationFindManyArgs, 'select' | 'include' | 'distinct'> & {
       select?: CollaborationCountAggregateInputType | true
     }
 
-  export interface CollaborationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+  export interface CollaborationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Collaboration'], meta: { name: 'Collaboration' } }
     /**
      * Find zero or one Collaboration that matches the filter.
@@ -5202,10 +4736,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends CollaborationFindUniqueArgs>(args: SelectSubset<T, CollaborationFindUniqueArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends CollaborationFindUniqueArgs>(args: SelectSubset<T, CollaborationFindUniqueArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one Collaboration that matches the filter or throw an error with `error.code='P2025'`
+     * Find one Collaboration that matches the filter or throw an error with `error.code='P2025'` 
      * if no matches were found.
      * @param {CollaborationFindUniqueOrThrowArgs} args - Arguments to find a Collaboration
      * @example
@@ -5216,7 +4750,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends CollaborationFindUniqueOrThrowArgs>(args: SelectSubset<T, CollaborationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends CollaborationFindUniqueOrThrowArgs>(args: SelectSubset<T, CollaborationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first Collaboration that matches the filter.
@@ -5231,7 +4765,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends CollaborationFindFirstArgs>(args?: SelectSubset<T, CollaborationFindFirstArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends CollaborationFindFirstArgs>(args?: SelectSubset<T, CollaborationFindFirstArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first Collaboration that matches the filter or
@@ -5247,7 +4781,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends CollaborationFindFirstOrThrowArgs>(args?: SelectSubset<T, CollaborationFindFirstOrThrowArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends CollaborationFindFirstOrThrowArgs>(args?: SelectSubset<T, CollaborationFindFirstOrThrowArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Collaborations that matches the filter.
@@ -5265,7 +4799,7 @@ export namespace Prisma {
      * const collaborationWithIdOnly = await prisma.collaboration.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends CollaborationFindManyArgs>(args?: SelectSubset<T, CollaborationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends CollaborationFindManyArgs>(args?: SelectSubset<T, CollaborationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a Collaboration.
@@ -5279,7 +4813,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends CollaborationCreateArgs>(args: SelectSubset<T, CollaborationCreateArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends CollaborationCreateArgs>(args: SelectSubset<T, CollaborationCreateArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Collaborations.
@@ -5307,7 +4841,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many Collaborations and only return the `id`
-     * const collaborationWithIdOnly = await prisma.collaboration.createManyAndReturn({
+     * const collaborationWithIdOnly = await prisma.collaboration.createManyAndReturn({ 
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -5317,7 +4851,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends CollaborationCreateManyAndReturnArgs>(args?: SelectSubset<T, CollaborationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends CollaborationCreateManyAndReturnArgs>(args?: SelectSubset<T, CollaborationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a Collaboration.
@@ -5331,7 +4865,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends CollaborationDeleteArgs>(args: SelectSubset<T, CollaborationDeleteArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends CollaborationDeleteArgs>(args: SelectSubset<T, CollaborationDeleteArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one Collaboration.
@@ -5348,7 +4882,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends CollaborationUpdateArgs>(args: SelectSubset<T, CollaborationUpdateArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends CollaborationUpdateArgs>(args: SelectSubset<T, CollaborationUpdateArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Collaborations.
@@ -5384,36 +4918,6 @@ export namespace Prisma {
     updateMany<T extends CollaborationUpdateManyArgs>(args: SelectSubset<T, CollaborationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Collaborations and returns the data updated in the database.
-     * @param {CollaborationUpdateManyAndReturnArgs} args - Arguments to update many Collaborations.
-     * @example
-     * // Update many Collaborations
-     * const collaboration = await prisma.collaboration.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Collaborations and only return the `id`
-     * const collaborationWithIdOnly = await prisma.collaboration.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends CollaborationUpdateManyAndReturnArgs>(args: SelectSubset<T, CollaborationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one Collaboration.
      * @param {CollaborationUpsertArgs} args - Arguments to update or create a Collaboration.
      * @example
@@ -5430,7 +4934,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends CollaborationUpsertArgs>(args: SelectSubset<T, CollaborationUpsertArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends CollaborationUpsertArgs>(args: SelectSubset<T, CollaborationUpsertArgs<ExtArgs>>): Prisma__CollaborationClient<$Result.GetResult<Prisma.$CollaborationPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
 
 
     /**
@@ -5570,10 +5074,10 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__CollaborationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__CollaborationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    canvas<T extends CanvasDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CanvasDefaultArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    users<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    canvas<T extends CanvasDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CanvasDefaultArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    users<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5601,7 +5105,7 @@ export namespace Prisma {
 
   /**
    * Fields of the Collaboration model
-   */
+   */ 
   interface CollaborationFieldRefs {
     readonly id: FieldRef<"Collaboration", 'String'>
     readonly canvasId: FieldRef<"Collaboration", 'String'>
@@ -5621,10 +5125,6 @@ export namespace Prisma {
      */
     select?: CollaborationSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Collaboration
-     */
-    omit?: CollaborationOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: CollaborationInclude<ExtArgs> | null
@@ -5643,10 +5143,6 @@ export namespace Prisma {
      */
     select?: CollaborationSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Collaboration
-     */
-    omit?: CollaborationOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: CollaborationInclude<ExtArgs> | null
@@ -5664,10 +5160,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the Collaboration
      */
     select?: CollaborationSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Collaboration
-     */
-    omit?: CollaborationOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -5717,10 +5209,6 @@ export namespace Prisma {
      */
     select?: CollaborationSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Collaboration
-     */
-    omit?: CollaborationOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: CollaborationInclude<ExtArgs> | null
@@ -5769,10 +5257,6 @@ export namespace Prisma {
      */
     select?: CollaborationSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Collaboration
-     */
-    omit?: CollaborationOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: CollaborationInclude<ExtArgs> | null
@@ -5816,10 +5300,6 @@ export namespace Prisma {
      */
     select?: CollaborationSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Collaboration
-     */
-    omit?: CollaborationOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: CollaborationInclude<ExtArgs> | null
@@ -5849,10 +5329,6 @@ export namespace Prisma {
      */
     select?: CollaborationSelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the Collaboration
-     */
-    omit?: CollaborationOmit<ExtArgs> | null
-    /**
      * The data used to create many Collaborations.
      */
     data: CollaborationCreateManyInput | CollaborationCreateManyInput[]
@@ -5871,10 +5347,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the Collaboration
      */
     select?: CollaborationSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Collaboration
-     */
-    omit?: CollaborationOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -5901,40 +5373,6 @@ export namespace Prisma {
      * Filter which Collaborations to update
      */
     where?: CollaborationWhereInput
-    /**
-     * Limit how many Collaborations to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Collaboration updateManyAndReturn
-   */
-  export type CollaborationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Collaboration
-     */
-    select?: CollaborationSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Collaboration
-     */
-    omit?: CollaborationOmit<ExtArgs> | null
-    /**
-     * The data used to update Collaborations.
-     */
-    data: XOR<CollaborationUpdateManyMutationInput, CollaborationUncheckedUpdateManyInput>
-    /**
-     * Filter which Collaborations to update
-     */
-    where?: CollaborationWhereInput
-    /**
-     * Limit how many Collaborations to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CollaborationIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -5945,10 +5383,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the Collaboration
      */
     select?: CollaborationSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Collaboration
-     */
-    omit?: CollaborationOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -5976,10 +5410,6 @@ export namespace Prisma {
      */
     select?: CollaborationSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Collaboration
-     */
-    omit?: CollaborationOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: CollaborationInclude<ExtArgs> | null
@@ -5997,10 +5427,6 @@ export namespace Prisma {
      * Filter which Collaborations to delete
      */
     where?: CollaborationWhereInput
-    /**
-     * Limit how many Collaborations to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -6011,10 +5437,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the Collaboration
      */
     select?: CollaborationSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Collaboration
-     */
-    omit?: CollaborationOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -6194,15 +5616,6 @@ export namespace Prisma {
     canvas?: boolean | CanvasDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["history"]>
 
-  export type HistorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    canvasId?: boolean
-    action?: boolean
-    data?: boolean
-    createdAt?: boolean
-    canvas?: boolean | CanvasDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["history"]>
-
   export type HistorySelectScalar = {
     id?: boolean
     canvasId?: boolean
@@ -6211,14 +5624,10 @@ export namespace Prisma {
     createdAt?: boolean
   }
 
-  export type HistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "canvasId" | "action" | "data" | "createdAt", ExtArgs["result"]["history"]>
   export type HistoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     canvas?: boolean | CanvasDefaultArgs<ExtArgs>
   }
   export type HistoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    canvas?: boolean | CanvasDefaultArgs<ExtArgs>
-  }
-  export type HistoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     canvas?: boolean | CanvasDefaultArgs<ExtArgs>
   }
 
@@ -6239,12 +5648,12 @@ export namespace Prisma {
 
   type HistoryGetPayload<S extends boolean | null | undefined | HistoryDefaultArgs> = $Result.GetResult<Prisma.$HistoryPayload, S>
 
-  type HistoryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<HistoryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+  type HistoryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<HistoryFindManyArgs, 'select' | 'include' | 'distinct'> & {
       select?: HistoryCountAggregateInputType | true
     }
 
-  export interface HistoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+  export interface HistoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['History'], meta: { name: 'History' } }
     /**
      * Find zero or one History that matches the filter.
@@ -6257,10 +5666,10 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends HistoryFindUniqueArgs>(args: SelectSubset<T, HistoryFindUniqueArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends HistoryFindUniqueArgs>(args: SelectSubset<T, HistoryFindUniqueArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
 
     /**
-     * Find one History that matches the filter or throw an error with `error.code='P2025'`
+     * Find one History that matches the filter or throw an error with `error.code='P2025'` 
      * if no matches were found.
      * @param {HistoryFindUniqueOrThrowArgs} args - Arguments to find a History
      * @example
@@ -6271,7 +5680,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends HistoryFindUniqueOrThrowArgs>(args: SelectSubset<T, HistoryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends HistoryFindUniqueOrThrowArgs>(args: SelectSubset<T, HistoryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
 
     /**
      * Find the first History that matches the filter.
@@ -6286,7 +5695,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends HistoryFindFirstArgs>(args?: SelectSubset<T, HistoryFindFirstArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends HistoryFindFirstArgs>(args?: SelectSubset<T, HistoryFindFirstArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
 
     /**
      * Find the first History that matches the filter or
@@ -6302,7 +5711,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends HistoryFindFirstOrThrowArgs>(args?: SelectSubset<T, HistoryFindFirstOrThrowArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends HistoryFindFirstOrThrowArgs>(args?: SelectSubset<T, HistoryFindFirstOrThrowArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
 
     /**
      * Find zero or more Histories that matches the filter.
@@ -6320,7 +5729,7 @@ export namespace Prisma {
      * const historyWithIdOnly = await prisma.history.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends HistoryFindManyArgs>(args?: SelectSubset<T, HistoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends HistoryFindManyArgs>(args?: SelectSubset<T, HistoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "findMany">>
 
     /**
      * Create a History.
@@ -6334,7 +5743,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends HistoryCreateArgs>(args: SelectSubset<T, HistoryCreateArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends HistoryCreateArgs>(args: SelectSubset<T, HistoryCreateArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "create">, never, ExtArgs>
 
     /**
      * Create many Histories.
@@ -6362,7 +5771,7 @@ export namespace Prisma {
      * })
      * 
      * // Create many Histories and only return the `id`
-     * const historyWithIdOnly = await prisma.history.createManyAndReturn({
+     * const historyWithIdOnly = await prisma.history.createManyAndReturn({ 
      *   select: { id: true },
      *   data: [
      *     // ... provide data here
@@ -6372,7 +5781,7 @@ export namespace Prisma {
      * Read more here: https://pris.ly/d/null-undefined
      * 
      */
-    createManyAndReturn<T extends HistoryCreateManyAndReturnArgs>(args?: SelectSubset<T, HistoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends HistoryCreateManyAndReturnArgs>(args?: SelectSubset<T, HistoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "createManyAndReturn">>
 
     /**
      * Delete a History.
@@ -6386,7 +5795,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends HistoryDeleteArgs>(args: SelectSubset<T, HistoryDeleteArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends HistoryDeleteArgs>(args: SelectSubset<T, HistoryDeleteArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "delete">, never, ExtArgs>
 
     /**
      * Update one History.
@@ -6403,7 +5812,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends HistoryUpdateArgs>(args: SelectSubset<T, HistoryUpdateArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends HistoryUpdateArgs>(args: SelectSubset<T, HistoryUpdateArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "update">, never, ExtArgs>
 
     /**
      * Delete zero or more Histories.
@@ -6439,36 +5848,6 @@ export namespace Prisma {
     updateMany<T extends HistoryUpdateManyArgs>(args: SelectSubset<T, HistoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Histories and returns the data updated in the database.
-     * @param {HistoryUpdateManyAndReturnArgs} args - Arguments to update many Histories.
-     * @example
-     * // Update many Histories
-     * const history = await prisma.history.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Histories and only return the `id`
-     * const historyWithIdOnly = await prisma.history.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends HistoryUpdateManyAndReturnArgs>(args: SelectSubset<T, HistoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one History.
      * @param {HistoryUpsertArgs} args - Arguments to update or create a History.
      * @example
@@ -6485,7 +5864,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends HistoryUpsertArgs>(args: SelectSubset<T, HistoryUpsertArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends HistoryUpsertArgs>(args: SelectSubset<T, HistoryUpsertArgs<ExtArgs>>): Prisma__HistoryClient<$Result.GetResult<Prisma.$HistoryPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
 
 
     /**
@@ -6625,9 +6004,9 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__HistoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+  export interface Prisma__HistoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    canvas<T extends CanvasDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CanvasDefaultArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    canvas<T extends CanvasDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CanvasDefaultArgs<ExtArgs>>): Prisma__CanvasClient<$Result.GetResult<Prisma.$CanvasPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6655,7 +6034,7 @@ export namespace Prisma {
 
   /**
    * Fields of the History model
-   */
+   */ 
   interface HistoryFieldRefs {
     readonly id: FieldRef<"History", 'String'>
     readonly canvasId: FieldRef<"History", 'String'>
@@ -6675,10 +6054,6 @@ export namespace Prisma {
      */
     select?: HistorySelect<ExtArgs> | null
     /**
-     * Omit specific fields from the History
-     */
-    omit?: HistoryOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: HistoryInclude<ExtArgs> | null
@@ -6697,10 +6072,6 @@ export namespace Prisma {
      */
     select?: HistorySelect<ExtArgs> | null
     /**
-     * Omit specific fields from the History
-     */
-    omit?: HistoryOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: HistoryInclude<ExtArgs> | null
@@ -6718,10 +6089,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the History
      */
     select?: HistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the History
-     */
-    omit?: HistoryOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -6771,10 +6138,6 @@ export namespace Prisma {
      */
     select?: HistorySelect<ExtArgs> | null
     /**
-     * Omit specific fields from the History
-     */
-    omit?: HistoryOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: HistoryInclude<ExtArgs> | null
@@ -6823,10 +6186,6 @@ export namespace Prisma {
      */
     select?: HistorySelect<ExtArgs> | null
     /**
-     * Omit specific fields from the History
-     */
-    omit?: HistoryOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: HistoryInclude<ExtArgs> | null
@@ -6870,10 +6229,6 @@ export namespace Prisma {
      */
     select?: HistorySelect<ExtArgs> | null
     /**
-     * Omit specific fields from the History
-     */
-    omit?: HistoryOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: HistoryInclude<ExtArgs> | null
@@ -6903,10 +6258,6 @@ export namespace Prisma {
      */
     select?: HistorySelectCreateManyAndReturn<ExtArgs> | null
     /**
-     * Omit specific fields from the History
-     */
-    omit?: HistoryOmit<ExtArgs> | null
-    /**
      * The data used to create many Histories.
      */
     data: HistoryCreateManyInput | HistoryCreateManyInput[]
@@ -6925,10 +6276,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the History
      */
     select?: HistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the History
-     */
-    omit?: HistoryOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -6955,40 +6302,6 @@ export namespace Prisma {
      * Filter which Histories to update
      */
     where?: HistoryWhereInput
-    /**
-     * Limit how many Histories to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * History updateManyAndReturn
-   */
-  export type HistoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the History
-     */
-    select?: HistorySelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the History
-     */
-    omit?: HistoryOmit<ExtArgs> | null
-    /**
-     * The data used to update Histories.
-     */
-    data: XOR<HistoryUpdateManyMutationInput, HistoryUncheckedUpdateManyInput>
-    /**
-     * Filter which Histories to update
-     */
-    where?: HistoryWhereInput
-    /**
-     * Limit how many Histories to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: HistoryIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -6999,10 +6312,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the History
      */
     select?: HistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the History
-     */
-    omit?: HistoryOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -7030,10 +6339,6 @@ export namespace Prisma {
      */
     select?: HistorySelect<ExtArgs> | null
     /**
-     * Omit specific fields from the History
-     */
-    omit?: HistoryOmit<ExtArgs> | null
-    /**
      * Choose, which related nodes to fetch as well
      */
     include?: HistoryInclude<ExtArgs> | null
@@ -7051,10 +6356,6 @@ export namespace Prisma {
      * Filter which Histories to delete
      */
     where?: HistoryWhereInput
-    /**
-     * Limit how many Histories to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -7065,10 +6366,6 @@ export namespace Prisma {
      * Select specific fields to fetch from the History
      */
     select?: HistorySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the History
-     */
-    omit?: HistoryOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
@@ -7210,7 +6507,7 @@ export namespace Prisma {
 
 
   /**
-   * Field references
+   * Field references 
    */
 
 
@@ -7285,13 +6582,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'QueryMode'
-   */
-  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
-
-
-  /**
    * Reference to a field of type 'LineType'
    */
   export type EnumLineTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LineType'>
@@ -7346,7 +6636,7 @@ export namespace Prisma {
     password?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
-    canvases?: CanvasListRelationFilter
+    canvases?: XOR<CanvasNullableRelationFilter, CanvasWhereInput> | null
     collaborations?: CollaborationListRelationFilter
   }
 
@@ -7357,7 +6647,7 @@ export namespace Prisma {
     password?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    canvases?: CanvasOrderByRelationAggregateInput
+    canvases?: CanvasOrderByWithRelationInput
     collaborations?: CollaborationOrderByRelationAggregateInput
   }
 
@@ -7371,7 +6661,7 @@ export namespace Prisma {
     password?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
-    canvases?: CanvasListRelationFilter
+    canvases?: XOR<CanvasNullableRelationFilter, CanvasWhereInput> | null
     collaborations?: CollaborationListRelationFilter
   }, "id" | "id" | "email">
 
@@ -7413,10 +6703,10 @@ export namespace Prisma {
     shareToken?: StringNullableFilter<"Canvas"> | string | null
     createdAt?: DateTimeFilter<"Canvas"> | Date | string
     updatedAt?: DateTimeFilter<"Canvas"> | Date | string
-    owner?: XOR<UserScalarRelationFilter, UserWhereInput>
-    shapes?: ShapeListRelationFilter
+    owner?: XOR<UserRelationFilter, UserWhereInput>
     collaborators?: CollaborationListRelationFilter
     history?: HistoryListRelationFilter
+    shapes?: ShapeListRelationFilter
   }
 
   export type CanvasOrderByWithRelationInput = {
@@ -7431,9 +6721,9 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     owner?: UserOrderByWithRelationInput
-    shapes?: ShapeOrderByRelationAggregateInput
     collaborators?: CollaborationOrderByRelationAggregateInput
     history?: HistoryOrderByRelationAggregateInput
+    shapes?: ShapeOrderByRelationAggregateInput
   }
 
   export type CanvasWhereUniqueInput = Prisma.AtLeast<{
@@ -7450,10 +6740,10 @@ export namespace Prisma {
     isReadOnly?: BoolFilter<"Canvas"> | boolean
     createdAt?: DateTimeFilter<"Canvas"> | Date | string
     updatedAt?: DateTimeFilter<"Canvas"> | Date | string
-    owner?: XOR<UserScalarRelationFilter, UserWhereInput>
-    shapes?: ShapeListRelationFilter
+    owner?: XOR<UserRelationFilter, UserWhereInput>
     collaborators?: CollaborationListRelationFilter
     history?: HistoryListRelationFilter
+    shapes?: ShapeListRelationFilter
   }, "id" | "id" | "ownerId" | "shareToken">
 
   export type CanvasOrderByWithAggregationInput = {
@@ -7509,7 +6799,7 @@ export namespace Prisma {
     fillColor?: StringNullableFilter<"Shape"> | string | null
     createdAt?: DateTimeFilter<"Shape"> | Date | string
     updatedAt?: DateTimeFilter<"Shape"> | Date | string
-    canvas?: XOR<CanvasScalarRelationFilter, CanvasWhereInput>
+    canvas?: XOR<CanvasRelationFilter, CanvasWhereInput>
   }
 
   export type ShapeOrderByWithRelationInput = {
@@ -7550,7 +6840,7 @@ export namespace Prisma {
     fillColor?: StringNullableFilter<"Shape"> | string | null
     createdAt?: DateTimeFilter<"Shape"> | Date | string
     updatedAt?: DateTimeFilter<"Shape"> | Date | string
-    canvas?: XOR<CanvasScalarRelationFilter, CanvasWhereInput>
+    canvas?: XOR<CanvasRelationFilter, CanvasWhereInput>
   }, "id" | "id">
 
   export type ShapeOrderByWithAggregationInput = {
@@ -7606,8 +6896,8 @@ export namespace Prisma {
     userId?: StringFilter<"Collaboration"> | string
     role?: EnumRoleFilter<"Collaboration"> | $Enums.Role
     joinedAt?: DateTimeFilter<"Collaboration"> | Date | string
-    canvas?: XOR<CanvasScalarRelationFilter, CanvasWhereInput>
-    users?: XOR<UserScalarRelationFilter, UserWhereInput>
+    canvas?: XOR<CanvasRelationFilter, CanvasWhereInput>
+    users?: XOR<UserRelationFilter, UserWhereInput>
   }
 
   export type CollaborationOrderByWithRelationInput = {
@@ -7629,8 +6919,8 @@ export namespace Prisma {
     userId?: StringFilter<"Collaboration"> | string
     role?: EnumRoleFilter<"Collaboration"> | $Enums.Role
     joinedAt?: DateTimeFilter<"Collaboration"> | Date | string
-    canvas?: XOR<CanvasScalarRelationFilter, CanvasWhereInput>
-    users?: XOR<UserScalarRelationFilter, UserWhereInput>
+    canvas?: XOR<CanvasRelationFilter, CanvasWhereInput>
+    users?: XOR<UserRelationFilter, UserWhereInput>
   }, "id">
 
   export type CollaborationOrderByWithAggregationInput = {
@@ -7664,7 +6954,7 @@ export namespace Prisma {
     action?: StringFilter<"History"> | string
     data?: JsonFilter<"History">
     createdAt?: DateTimeFilter<"History"> | Date | string
-    canvas?: XOR<CanvasScalarRelationFilter, CanvasWhereInput>
+    canvas?: XOR<CanvasRelationFilter, CanvasWhereInput>
   }
 
   export type HistoryOrderByWithRelationInput = {
@@ -7685,7 +6975,7 @@ export namespace Prisma {
     action?: StringFilter<"History"> | string
     data?: JsonFilter<"History">
     createdAt?: DateTimeFilter<"History"> | Date | string
-    canvas?: XOR<CanvasScalarRelationFilter, CanvasWhereInput>
+    canvas?: XOR<CanvasRelationFilter, CanvasWhereInput>
   }, "id">
 
   export type HistoryOrderByWithAggregationInput = {
@@ -7717,7 +7007,7 @@ export namespace Prisma {
     password: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    canvases?: CanvasCreateNestedManyWithoutOwnerInput
+    canvases?: CanvasCreateNestedOneWithoutOwnerInput
     collaborations?: CollaborationCreateNestedManyWithoutUsersInput
   }
 
@@ -7728,7 +7018,7 @@ export namespace Prisma {
     password: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    canvases?: CanvasUncheckedCreateNestedManyWithoutOwnerInput
+    canvases?: CanvasUncheckedCreateNestedOneWithoutOwnerInput
     collaborations?: CollaborationUncheckedCreateNestedManyWithoutUsersInput
   }
 
@@ -7739,7 +7029,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    canvases?: CanvasUpdateManyWithoutOwnerNestedInput
+    canvases?: CanvasUpdateOneWithoutOwnerNestedInput
     collaborations?: CollaborationUpdateManyWithoutUsersNestedInput
   }
 
@@ -7750,7 +7040,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    canvases?: CanvasUncheckedUpdateManyWithoutOwnerNestedInput
+    canvases?: CanvasUncheckedUpdateOneWithoutOwnerNestedInput
     collaborations?: CollaborationUncheckedUpdateManyWithoutUsersNestedInput
   }
 
@@ -7792,9 +7082,9 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutCanvasesInput
-    shapes?: ShapeCreateNestedManyWithoutCanvasInput
     collaborators?: CollaborationCreateNestedManyWithoutCanvasInput
     history?: HistoryCreateNestedManyWithoutCanvasInput
+    shapes?: ShapeCreateNestedManyWithoutCanvasInput
   }
 
   export type CanvasUncheckedCreateInput = {
@@ -7808,9 +7098,9 @@ export namespace Prisma {
     shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    shapes?: ShapeUncheckedCreateNestedManyWithoutCanvasInput
     collaborators?: CollaborationUncheckedCreateNestedManyWithoutCanvasInput
     history?: HistoryUncheckedCreateNestedManyWithoutCanvasInput
+    shapes?: ShapeUncheckedCreateNestedManyWithoutCanvasInput
   }
 
   export type CanvasUpdateInput = {
@@ -7824,9 +7114,9 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutCanvasesNestedInput
-    shapes?: ShapeUpdateManyWithoutCanvasNestedInput
     collaborators?: CollaborationUpdateManyWithoutCanvasNestedInput
     history?: HistoryUpdateManyWithoutCanvasNestedInput
+    shapes?: ShapeUpdateManyWithoutCanvasNestedInput
   }
 
   export type CanvasUncheckedUpdateInput = {
@@ -7840,9 +7130,9 @@ export namespace Prisma {
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    shapes?: ShapeUncheckedUpdateManyWithoutCanvasNestedInput
     collaborators?: CollaborationUncheckedUpdateManyWithoutCanvasNestedInput
     history?: HistoryUncheckedUpdateManyWithoutCanvasNestedInput
+    shapes?: ShapeUncheckedUpdateManyWithoutCanvasNestedInput
   }
 
   export type CanvasCreateManyInput = {
@@ -8143,20 +7433,15 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
-  export type CanvasListRelationFilter = {
-    every?: CanvasWhereInput
-    some?: CanvasWhereInput
-    none?: CanvasWhereInput
+  export type CanvasNullableRelationFilter = {
+    is?: CanvasWhereInput | null
+    isNot?: CanvasWhereInput | null
   }
 
   export type CollaborationListRelationFilter = {
     every?: CollaborationWhereInput
     some?: CollaborationWhereInput
     none?: CollaborationWhereInput
-  }
-
-  export type CanvasOrderByRelationAggregateInput = {
-    _count?: SortOrder
   }
 
   export type CollaborationOrderByRelationAggregateInput = {
@@ -8253,15 +7538,9 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type UserScalarRelationFilter = {
+  export type UserRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
-  }
-
-  export type ShapeListRelationFilter = {
-    every?: ShapeWhereInput
-    some?: ShapeWhereInput
-    none?: ShapeWhereInput
   }
 
   export type HistoryListRelationFilter = {
@@ -8270,16 +7549,22 @@ export namespace Prisma {
     none?: HistoryWhereInput
   }
 
+  export type ShapeListRelationFilter = {
+    every?: ShapeWhereInput
+    some?: ShapeWhereInput
+    none?: ShapeWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
   }
 
-  export type ShapeOrderByRelationAggregateInput = {
+  export type HistoryOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
-  export type HistoryOrderByRelationAggregateInput = {
+  export type ShapeOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -8393,7 +7678,7 @@ export namespace Prisma {
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
-  export type JsonNullableFilter<$PrismaModel = never> =
+  export type JsonNullableFilter<$PrismaModel = never> = 
     | PatchUndefined<
         Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
         Required<JsonNullableFilterBase<$PrismaModel>>
@@ -8403,13 +7688,12 @@ export namespace Prisma {
   export type JsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -8424,7 +7708,7 @@ export namespace Prisma {
     not?: NestedEnumLineTypeFilter<$PrismaModel> | $Enums.LineType
   }
 
-  export type CanvasScalarRelationFilter = {
+  export type CanvasRelationFilter = {
     is?: CanvasWhereInput
     isNot?: CanvasWhereInput
   }
@@ -8524,7 +7808,7 @@ export namespace Prisma {
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
   }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> = 
     | PatchUndefined<
         Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
         Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
@@ -8534,13 +7818,12 @@ export namespace Prisma {
   export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -8601,7 +7884,7 @@ export namespace Prisma {
     _min?: NestedEnumRoleFilter<$PrismaModel>
     _max?: NestedEnumRoleFilter<$PrismaModel>
   }
-  export type JsonFilter<$PrismaModel = never> =
+  export type JsonFilter<$PrismaModel = never> = 
     | PatchUndefined<
         Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
         Required<JsonFilterBase<$PrismaModel>>
@@ -8611,13 +7894,12 @@ export namespace Prisma {
   export type JsonFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -8646,7 +7928,7 @@ export namespace Prisma {
     action?: SortOrder
     createdAt?: SortOrder
   }
-  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+  export type JsonWithAggregatesFilter<$PrismaModel = never> = 
     | PatchUndefined<
         Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
         Required<JsonWithAggregatesFilterBase<$PrismaModel>>
@@ -8656,13 +7938,12 @@ export namespace Prisma {
   export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -8673,11 +7954,10 @@ export namespace Prisma {
     _max?: NestedJsonFilter<$PrismaModel>
   }
 
-  export type CanvasCreateNestedManyWithoutOwnerInput = {
-    create?: XOR<CanvasCreateWithoutOwnerInput, CanvasUncheckedCreateWithoutOwnerInput> | CanvasCreateWithoutOwnerInput[] | CanvasUncheckedCreateWithoutOwnerInput[]
-    connectOrCreate?: CanvasCreateOrConnectWithoutOwnerInput | CanvasCreateOrConnectWithoutOwnerInput[]
-    createMany?: CanvasCreateManyOwnerInputEnvelope
-    connect?: CanvasWhereUniqueInput | CanvasWhereUniqueInput[]
+  export type CanvasCreateNestedOneWithoutOwnerInput = {
+    create?: XOR<CanvasCreateWithoutOwnerInput, CanvasUncheckedCreateWithoutOwnerInput>
+    connectOrCreate?: CanvasCreateOrConnectWithoutOwnerInput
+    connect?: CanvasWhereUniqueInput
   }
 
   export type CollaborationCreateNestedManyWithoutUsersInput = {
@@ -8687,11 +7967,10 @@ export namespace Prisma {
     connect?: CollaborationWhereUniqueInput | CollaborationWhereUniqueInput[]
   }
 
-  export type CanvasUncheckedCreateNestedManyWithoutOwnerInput = {
-    create?: XOR<CanvasCreateWithoutOwnerInput, CanvasUncheckedCreateWithoutOwnerInput> | CanvasCreateWithoutOwnerInput[] | CanvasUncheckedCreateWithoutOwnerInput[]
-    connectOrCreate?: CanvasCreateOrConnectWithoutOwnerInput | CanvasCreateOrConnectWithoutOwnerInput[]
-    createMany?: CanvasCreateManyOwnerInputEnvelope
-    connect?: CanvasWhereUniqueInput | CanvasWhereUniqueInput[]
+  export type CanvasUncheckedCreateNestedOneWithoutOwnerInput = {
+    create?: XOR<CanvasCreateWithoutOwnerInput, CanvasUncheckedCreateWithoutOwnerInput>
+    connectOrCreate?: CanvasCreateOrConnectWithoutOwnerInput
+    connect?: CanvasWhereUniqueInput
   }
 
   export type CollaborationUncheckedCreateNestedManyWithoutUsersInput = {
@@ -8709,18 +7988,14 @@ export namespace Prisma {
     set?: Date | string
   }
 
-  export type CanvasUpdateManyWithoutOwnerNestedInput = {
-    create?: XOR<CanvasCreateWithoutOwnerInput, CanvasUncheckedCreateWithoutOwnerInput> | CanvasCreateWithoutOwnerInput[] | CanvasUncheckedCreateWithoutOwnerInput[]
-    connectOrCreate?: CanvasCreateOrConnectWithoutOwnerInput | CanvasCreateOrConnectWithoutOwnerInput[]
-    upsert?: CanvasUpsertWithWhereUniqueWithoutOwnerInput | CanvasUpsertWithWhereUniqueWithoutOwnerInput[]
-    createMany?: CanvasCreateManyOwnerInputEnvelope
-    set?: CanvasWhereUniqueInput | CanvasWhereUniqueInput[]
-    disconnect?: CanvasWhereUniqueInput | CanvasWhereUniqueInput[]
-    delete?: CanvasWhereUniqueInput | CanvasWhereUniqueInput[]
-    connect?: CanvasWhereUniqueInput | CanvasWhereUniqueInput[]
-    update?: CanvasUpdateWithWhereUniqueWithoutOwnerInput | CanvasUpdateWithWhereUniqueWithoutOwnerInput[]
-    updateMany?: CanvasUpdateManyWithWhereWithoutOwnerInput | CanvasUpdateManyWithWhereWithoutOwnerInput[]
-    deleteMany?: CanvasScalarWhereInput | CanvasScalarWhereInput[]
+  export type CanvasUpdateOneWithoutOwnerNestedInput = {
+    create?: XOR<CanvasCreateWithoutOwnerInput, CanvasUncheckedCreateWithoutOwnerInput>
+    connectOrCreate?: CanvasCreateOrConnectWithoutOwnerInput
+    upsert?: CanvasUpsertWithoutOwnerInput
+    disconnect?: CanvasWhereInput | boolean
+    delete?: CanvasWhereInput | boolean
+    connect?: CanvasWhereUniqueInput
+    update?: XOR<XOR<CanvasUpdateToOneWithWhereWithoutOwnerInput, CanvasUpdateWithoutOwnerInput>, CanvasUncheckedUpdateWithoutOwnerInput>
   }
 
   export type CollaborationUpdateManyWithoutUsersNestedInput = {
@@ -8737,18 +8012,14 @@ export namespace Prisma {
     deleteMany?: CollaborationScalarWhereInput | CollaborationScalarWhereInput[]
   }
 
-  export type CanvasUncheckedUpdateManyWithoutOwnerNestedInput = {
-    create?: XOR<CanvasCreateWithoutOwnerInput, CanvasUncheckedCreateWithoutOwnerInput> | CanvasCreateWithoutOwnerInput[] | CanvasUncheckedCreateWithoutOwnerInput[]
-    connectOrCreate?: CanvasCreateOrConnectWithoutOwnerInput | CanvasCreateOrConnectWithoutOwnerInput[]
-    upsert?: CanvasUpsertWithWhereUniqueWithoutOwnerInput | CanvasUpsertWithWhereUniqueWithoutOwnerInput[]
-    createMany?: CanvasCreateManyOwnerInputEnvelope
-    set?: CanvasWhereUniqueInput | CanvasWhereUniqueInput[]
-    disconnect?: CanvasWhereUniqueInput | CanvasWhereUniqueInput[]
-    delete?: CanvasWhereUniqueInput | CanvasWhereUniqueInput[]
-    connect?: CanvasWhereUniqueInput | CanvasWhereUniqueInput[]
-    update?: CanvasUpdateWithWhereUniqueWithoutOwnerInput | CanvasUpdateWithWhereUniqueWithoutOwnerInput[]
-    updateMany?: CanvasUpdateManyWithWhereWithoutOwnerInput | CanvasUpdateManyWithWhereWithoutOwnerInput[]
-    deleteMany?: CanvasScalarWhereInput | CanvasScalarWhereInput[]
+  export type CanvasUncheckedUpdateOneWithoutOwnerNestedInput = {
+    create?: XOR<CanvasCreateWithoutOwnerInput, CanvasUncheckedCreateWithoutOwnerInput>
+    connectOrCreate?: CanvasCreateOrConnectWithoutOwnerInput
+    upsert?: CanvasUpsertWithoutOwnerInput
+    disconnect?: CanvasWhereInput | boolean
+    delete?: CanvasWhereInput | boolean
+    connect?: CanvasWhereUniqueInput
+    update?: XOR<XOR<CanvasUpdateToOneWithWhereWithoutOwnerInput, CanvasUpdateWithoutOwnerInput>, CanvasUncheckedUpdateWithoutOwnerInput>
   }
 
   export type CollaborationUncheckedUpdateManyWithoutUsersNestedInput = {
@@ -8771,13 +8042,6 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type ShapeCreateNestedManyWithoutCanvasInput = {
-    create?: XOR<ShapeCreateWithoutCanvasInput, ShapeUncheckedCreateWithoutCanvasInput> | ShapeCreateWithoutCanvasInput[] | ShapeUncheckedCreateWithoutCanvasInput[]
-    connectOrCreate?: ShapeCreateOrConnectWithoutCanvasInput | ShapeCreateOrConnectWithoutCanvasInput[]
-    createMany?: ShapeCreateManyCanvasInputEnvelope
-    connect?: ShapeWhereUniqueInput | ShapeWhereUniqueInput[]
-  }
-
   export type CollaborationCreateNestedManyWithoutCanvasInput = {
     create?: XOR<CollaborationCreateWithoutCanvasInput, CollaborationUncheckedCreateWithoutCanvasInput> | CollaborationCreateWithoutCanvasInput[] | CollaborationUncheckedCreateWithoutCanvasInput[]
     connectOrCreate?: CollaborationCreateOrConnectWithoutCanvasInput | CollaborationCreateOrConnectWithoutCanvasInput[]
@@ -8792,7 +8056,7 @@ export namespace Prisma {
     connect?: HistoryWhereUniqueInput | HistoryWhereUniqueInput[]
   }
 
-  export type ShapeUncheckedCreateNestedManyWithoutCanvasInput = {
+  export type ShapeCreateNestedManyWithoutCanvasInput = {
     create?: XOR<ShapeCreateWithoutCanvasInput, ShapeUncheckedCreateWithoutCanvasInput> | ShapeCreateWithoutCanvasInput[] | ShapeUncheckedCreateWithoutCanvasInput[]
     connectOrCreate?: ShapeCreateOrConnectWithoutCanvasInput | ShapeCreateOrConnectWithoutCanvasInput[]
     createMany?: ShapeCreateManyCanvasInputEnvelope
@@ -8811,6 +8075,13 @@ export namespace Prisma {
     connectOrCreate?: HistoryCreateOrConnectWithoutCanvasInput | HistoryCreateOrConnectWithoutCanvasInput[]
     createMany?: HistoryCreateManyCanvasInputEnvelope
     connect?: HistoryWhereUniqueInput | HistoryWhereUniqueInput[]
+  }
+
+  export type ShapeUncheckedCreateNestedManyWithoutCanvasInput = {
+    create?: XOR<ShapeCreateWithoutCanvasInput, ShapeUncheckedCreateWithoutCanvasInput> | ShapeCreateWithoutCanvasInput[] | ShapeUncheckedCreateWithoutCanvasInput[]
+    connectOrCreate?: ShapeCreateOrConnectWithoutCanvasInput | ShapeCreateOrConnectWithoutCanvasInput[]
+    createMany?: ShapeCreateManyCanvasInputEnvelope
+    connect?: ShapeWhereUniqueInput | ShapeWhereUniqueInput[]
   }
 
   export type FloatFieldUpdateOperationsInput = {
@@ -8835,20 +8106,6 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutCanvasesInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCanvasesInput, UserUpdateWithoutCanvasesInput>, UserUncheckedUpdateWithoutCanvasesInput>
-  }
-
-  export type ShapeUpdateManyWithoutCanvasNestedInput = {
-    create?: XOR<ShapeCreateWithoutCanvasInput, ShapeUncheckedCreateWithoutCanvasInput> | ShapeCreateWithoutCanvasInput[] | ShapeUncheckedCreateWithoutCanvasInput[]
-    connectOrCreate?: ShapeCreateOrConnectWithoutCanvasInput | ShapeCreateOrConnectWithoutCanvasInput[]
-    upsert?: ShapeUpsertWithWhereUniqueWithoutCanvasInput | ShapeUpsertWithWhereUniqueWithoutCanvasInput[]
-    createMany?: ShapeCreateManyCanvasInputEnvelope
-    set?: ShapeWhereUniqueInput | ShapeWhereUniqueInput[]
-    disconnect?: ShapeWhereUniqueInput | ShapeWhereUniqueInput[]
-    delete?: ShapeWhereUniqueInput | ShapeWhereUniqueInput[]
-    connect?: ShapeWhereUniqueInput | ShapeWhereUniqueInput[]
-    update?: ShapeUpdateWithWhereUniqueWithoutCanvasInput | ShapeUpdateWithWhereUniqueWithoutCanvasInput[]
-    updateMany?: ShapeUpdateManyWithWhereWithoutCanvasInput | ShapeUpdateManyWithWhereWithoutCanvasInput[]
-    deleteMany?: ShapeScalarWhereInput | ShapeScalarWhereInput[]
   }
 
   export type CollaborationUpdateManyWithoutCanvasNestedInput = {
@@ -8879,7 +8136,7 @@ export namespace Prisma {
     deleteMany?: HistoryScalarWhereInput | HistoryScalarWhereInput[]
   }
 
-  export type ShapeUncheckedUpdateManyWithoutCanvasNestedInput = {
+  export type ShapeUpdateManyWithoutCanvasNestedInput = {
     create?: XOR<ShapeCreateWithoutCanvasInput, ShapeUncheckedCreateWithoutCanvasInput> | ShapeCreateWithoutCanvasInput[] | ShapeUncheckedCreateWithoutCanvasInput[]
     connectOrCreate?: ShapeCreateOrConnectWithoutCanvasInput | ShapeCreateOrConnectWithoutCanvasInput[]
     upsert?: ShapeUpsertWithWhereUniqueWithoutCanvasInput | ShapeUpsertWithWhereUniqueWithoutCanvasInput[]
@@ -8919,6 +8176,20 @@ export namespace Prisma {
     update?: HistoryUpdateWithWhereUniqueWithoutCanvasInput | HistoryUpdateWithWhereUniqueWithoutCanvasInput[]
     updateMany?: HistoryUpdateManyWithWhereWithoutCanvasInput | HistoryUpdateManyWithWhereWithoutCanvasInput[]
     deleteMany?: HistoryScalarWhereInput | HistoryScalarWhereInput[]
+  }
+
+  export type ShapeUncheckedUpdateManyWithoutCanvasNestedInput = {
+    create?: XOR<ShapeCreateWithoutCanvasInput, ShapeUncheckedCreateWithoutCanvasInput> | ShapeCreateWithoutCanvasInput[] | ShapeUncheckedCreateWithoutCanvasInput[]
+    connectOrCreate?: ShapeCreateOrConnectWithoutCanvasInput | ShapeCreateOrConnectWithoutCanvasInput[]
+    upsert?: ShapeUpsertWithWhereUniqueWithoutCanvasInput | ShapeUpsertWithWhereUniqueWithoutCanvasInput[]
+    createMany?: ShapeCreateManyCanvasInputEnvelope
+    set?: ShapeWhereUniqueInput | ShapeWhereUniqueInput[]
+    disconnect?: ShapeWhereUniqueInput | ShapeWhereUniqueInput[]
+    delete?: ShapeWhereUniqueInput | ShapeWhereUniqueInput[]
+    connect?: ShapeWhereUniqueInput | ShapeWhereUniqueInput[]
+    update?: ShapeUpdateWithWhereUniqueWithoutCanvasInput | ShapeUpdateWithWhereUniqueWithoutCanvasInput[]
+    updateMany?: ShapeUpdateManyWithWhereWithoutCanvasInput | ShapeUpdateManyWithWhereWithoutCanvasInput[]
+    deleteMany?: ShapeScalarWhereInput | ShapeScalarWhereInput[]
   }
 
   export type CanvasCreateNestedOneWithoutShapesInput = {
@@ -9196,7 +8467,7 @@ export namespace Prisma {
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
   }
-  export type NestedJsonNullableFilter<$PrismaModel = never> =
+  export type NestedJsonNullableFilter<$PrismaModel = never> = 
     | PatchUndefined<
         Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
         Required<NestedJsonNullableFilterBase<$PrismaModel>>
@@ -9206,13 +8477,12 @@ export namespace Prisma {
   export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -9246,7 +8516,7 @@ export namespace Prisma {
     _min?: NestedEnumRoleFilter<$PrismaModel>
     _max?: NestedEnumRoleFilter<$PrismaModel>
   }
-  export type NestedJsonFilter<$PrismaModel = never> =
+  export type NestedJsonFilter<$PrismaModel = never> = 
     | PatchUndefined<
         Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
         Required<NestedJsonFilterBase<$PrismaModel>>
@@ -9256,13 +8526,12 @@ export namespace Prisma {
   export type NestedJsonFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -9280,9 +8549,9 @@ export namespace Prisma {
     shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    shapes?: ShapeCreateNestedManyWithoutCanvasInput
     collaborators?: CollaborationCreateNestedManyWithoutCanvasInput
     history?: HistoryCreateNestedManyWithoutCanvasInput
+    shapes?: ShapeCreateNestedManyWithoutCanvasInput
   }
 
   export type CanvasUncheckedCreateWithoutOwnerInput = {
@@ -9295,19 +8564,14 @@ export namespace Prisma {
     shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    shapes?: ShapeUncheckedCreateNestedManyWithoutCanvasInput
     collaborators?: CollaborationUncheckedCreateNestedManyWithoutCanvasInput
     history?: HistoryUncheckedCreateNestedManyWithoutCanvasInput
+    shapes?: ShapeUncheckedCreateNestedManyWithoutCanvasInput
   }
 
   export type CanvasCreateOrConnectWithoutOwnerInput = {
     where: CanvasWhereUniqueInput
     create: XOR<CanvasCreateWithoutOwnerInput, CanvasUncheckedCreateWithoutOwnerInput>
-  }
-
-  export type CanvasCreateManyOwnerInputEnvelope = {
-    data: CanvasCreateManyOwnerInput | CanvasCreateManyOwnerInput[]
-    skipDuplicates?: boolean
   }
 
   export type CollaborationCreateWithoutUsersInput = {
@@ -9334,36 +8598,45 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type CanvasUpsertWithWhereUniqueWithoutOwnerInput = {
-    where: CanvasWhereUniqueInput
+  export type CanvasUpsertWithoutOwnerInput = {
     update: XOR<CanvasUpdateWithoutOwnerInput, CanvasUncheckedUpdateWithoutOwnerInput>
     create: XOR<CanvasCreateWithoutOwnerInput, CanvasUncheckedCreateWithoutOwnerInput>
+    where?: CanvasWhereInput
   }
 
-  export type CanvasUpdateWithWhereUniqueWithoutOwnerInput = {
-    where: CanvasWhereUniqueInput
+  export type CanvasUpdateToOneWithWhereWithoutOwnerInput = {
+    where?: CanvasWhereInput
     data: XOR<CanvasUpdateWithoutOwnerInput, CanvasUncheckedUpdateWithoutOwnerInput>
   }
 
-  export type CanvasUpdateManyWithWhereWithoutOwnerInput = {
-    where: CanvasScalarWhereInput
-    data: XOR<CanvasUpdateManyMutationInput, CanvasUncheckedUpdateManyWithoutOwnerInput>
+  export type CanvasUpdateWithoutOwnerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    zoomLevel?: FloatFieldUpdateOperationsInput | number
+    panX?: FloatFieldUpdateOperationsInput | number
+    panY?: FloatFieldUpdateOperationsInput | number
+    isReadOnly?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    collaborators?: CollaborationUpdateManyWithoutCanvasNestedInput
+    history?: HistoryUpdateManyWithoutCanvasNestedInput
+    shapes?: ShapeUpdateManyWithoutCanvasNestedInput
   }
 
-  export type CanvasScalarWhereInput = {
-    AND?: CanvasScalarWhereInput | CanvasScalarWhereInput[]
-    OR?: CanvasScalarWhereInput[]
-    NOT?: CanvasScalarWhereInput | CanvasScalarWhereInput[]
-    id?: StringFilter<"Canvas"> | string
-    name?: StringFilter<"Canvas"> | string
-    ownerId?: StringFilter<"Canvas"> | string
-    zoomLevel?: FloatFilter<"Canvas"> | number
-    panX?: FloatFilter<"Canvas"> | number
-    panY?: FloatFilter<"Canvas"> | number
-    isReadOnly?: BoolFilter<"Canvas"> | boolean
-    shareToken?: StringNullableFilter<"Canvas"> | string | null
-    createdAt?: DateTimeFilter<"Canvas"> | Date | string
-    updatedAt?: DateTimeFilter<"Canvas"> | Date | string
+  export type CanvasUncheckedUpdateWithoutOwnerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    zoomLevel?: FloatFieldUpdateOperationsInput | number
+    panX?: FloatFieldUpdateOperationsInput | number
+    panY?: FloatFieldUpdateOperationsInput | number
+    isReadOnly?: BoolFieldUpdateOperationsInput | boolean
+    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    collaborators?: CollaborationUncheckedUpdateManyWithoutCanvasNestedInput
+    history?: HistoryUncheckedUpdateManyWithoutCanvasNestedInput
+    shapes?: ShapeUncheckedUpdateManyWithoutCanvasNestedInput
   }
 
   export type CollaborationUpsertWithWhereUniqueWithoutUsersInput = {
@@ -9418,50 +8691,6 @@ export namespace Prisma {
     create: XOR<UserCreateWithoutCanvasesInput, UserUncheckedCreateWithoutCanvasesInput>
   }
 
-  export type ShapeCreateWithoutCanvasInput = {
-    id?: string
-    type: $Enums.ShapeType
-    x: number
-    y: number
-    width?: number | null
-    height?: number | null
-    radius?: number | null
-    points?: NullableJsonNullValueInput | InputJsonValue
-    rotation?: number | null
-    lineType?: $Enums.LineType
-    color?: string
-    fillColor?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type ShapeUncheckedCreateWithoutCanvasInput = {
-    id?: string
-    type: $Enums.ShapeType
-    x: number
-    y: number
-    width?: number | null
-    height?: number | null
-    radius?: number | null
-    points?: NullableJsonNullValueInput | InputJsonValue
-    rotation?: number | null
-    lineType?: $Enums.LineType
-    color?: string
-    fillColor?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type ShapeCreateOrConnectWithoutCanvasInput = {
-    where: ShapeWhereUniqueInput
-    create: XOR<ShapeCreateWithoutCanvasInput, ShapeUncheckedCreateWithoutCanvasInput>
-  }
-
-  export type ShapeCreateManyCanvasInputEnvelope = {
-    data: ShapeCreateManyCanvasInput | ShapeCreateManyCanvasInput[]
-    skipDuplicates?: boolean
-  }
-
   export type CollaborationCreateWithoutCanvasInput = {
     id?: string
     role?: $Enums.Role
@@ -9510,6 +8739,50 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ShapeCreateWithoutCanvasInput = {
+    id?: string
+    type: $Enums.ShapeType
+    x: number
+    y: number
+    width?: number | null
+    height?: number | null
+    radius?: number | null
+    points?: NullableJsonNullValueInput | InputJsonValue
+    rotation?: number | null
+    lineType?: $Enums.LineType
+    color?: string
+    fillColor?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ShapeUncheckedCreateWithoutCanvasInput = {
+    id?: string
+    type: $Enums.ShapeType
+    x: number
+    y: number
+    width?: number | null
+    height?: number | null
+    radius?: number | null
+    points?: NullableJsonNullValueInput | InputJsonValue
+    rotation?: number | null
+    lineType?: $Enums.LineType
+    color?: string
+    fillColor?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ShapeCreateOrConnectWithoutCanvasInput = {
+    where: ShapeWhereUniqueInput
+    create: XOR<ShapeCreateWithoutCanvasInput, ShapeUncheckedCreateWithoutCanvasInput>
+  }
+
+  export type ShapeCreateManyCanvasInputEnvelope = {
+    data: ShapeCreateManyCanvasInput | ShapeCreateManyCanvasInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutCanvasesInput = {
     update: XOR<UserUpdateWithoutCanvasesInput, UserUncheckedUpdateWithoutCanvasesInput>
     create: XOR<UserCreateWithoutCanvasesInput, UserUncheckedCreateWithoutCanvasesInput>
@@ -9539,43 +8812,6 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     collaborations?: CollaborationUncheckedUpdateManyWithoutUsersNestedInput
-  }
-
-  export type ShapeUpsertWithWhereUniqueWithoutCanvasInput = {
-    where: ShapeWhereUniqueInput
-    update: XOR<ShapeUpdateWithoutCanvasInput, ShapeUncheckedUpdateWithoutCanvasInput>
-    create: XOR<ShapeCreateWithoutCanvasInput, ShapeUncheckedCreateWithoutCanvasInput>
-  }
-
-  export type ShapeUpdateWithWhereUniqueWithoutCanvasInput = {
-    where: ShapeWhereUniqueInput
-    data: XOR<ShapeUpdateWithoutCanvasInput, ShapeUncheckedUpdateWithoutCanvasInput>
-  }
-
-  export type ShapeUpdateManyWithWhereWithoutCanvasInput = {
-    where: ShapeScalarWhereInput
-    data: XOR<ShapeUpdateManyMutationInput, ShapeUncheckedUpdateManyWithoutCanvasInput>
-  }
-
-  export type ShapeScalarWhereInput = {
-    AND?: ShapeScalarWhereInput | ShapeScalarWhereInput[]
-    OR?: ShapeScalarWhereInput[]
-    NOT?: ShapeScalarWhereInput | ShapeScalarWhereInput[]
-    id?: StringFilter<"Shape"> | string
-    canvasId?: StringFilter<"Shape"> | string
-    type?: EnumShapeTypeFilter<"Shape"> | $Enums.ShapeType
-    x?: FloatFilter<"Shape"> | number
-    y?: FloatFilter<"Shape"> | number
-    width?: FloatNullableFilter<"Shape"> | number | null
-    height?: FloatNullableFilter<"Shape"> | number | null
-    radius?: FloatNullableFilter<"Shape"> | number | null
-    points?: JsonNullableFilter<"Shape">
-    rotation?: FloatNullableFilter<"Shape"> | number | null
-    lineType?: EnumLineTypeFilter<"Shape"> | $Enums.LineType
-    color?: StringFilter<"Shape"> | string
-    fillColor?: StringNullableFilter<"Shape"> | string | null
-    createdAt?: DateTimeFilter<"Shape"> | Date | string
-    updatedAt?: DateTimeFilter<"Shape"> | Date | string
   }
 
   export type CollaborationUpsertWithWhereUniqueWithoutCanvasInput = {
@@ -9619,6 +8855,43 @@ export namespace Prisma {
     action?: StringFilter<"History"> | string
     data?: JsonFilter<"History">
     createdAt?: DateTimeFilter<"History"> | Date | string
+  }
+
+  export type ShapeUpsertWithWhereUniqueWithoutCanvasInput = {
+    where: ShapeWhereUniqueInput
+    update: XOR<ShapeUpdateWithoutCanvasInput, ShapeUncheckedUpdateWithoutCanvasInput>
+    create: XOR<ShapeCreateWithoutCanvasInput, ShapeUncheckedCreateWithoutCanvasInput>
+  }
+
+  export type ShapeUpdateWithWhereUniqueWithoutCanvasInput = {
+    where: ShapeWhereUniqueInput
+    data: XOR<ShapeUpdateWithoutCanvasInput, ShapeUncheckedUpdateWithoutCanvasInput>
+  }
+
+  export type ShapeUpdateManyWithWhereWithoutCanvasInput = {
+    where: ShapeScalarWhereInput
+    data: XOR<ShapeUpdateManyMutationInput, ShapeUncheckedUpdateManyWithoutCanvasInput>
+  }
+
+  export type ShapeScalarWhereInput = {
+    AND?: ShapeScalarWhereInput | ShapeScalarWhereInput[]
+    OR?: ShapeScalarWhereInput[]
+    NOT?: ShapeScalarWhereInput | ShapeScalarWhereInput[]
+    id?: StringFilter<"Shape"> | string
+    canvasId?: StringFilter<"Shape"> | string
+    type?: EnumShapeTypeFilter<"Shape"> | $Enums.ShapeType
+    x?: FloatFilter<"Shape"> | number
+    y?: FloatFilter<"Shape"> | number
+    width?: FloatNullableFilter<"Shape"> | number | null
+    height?: FloatNullableFilter<"Shape"> | number | null
+    radius?: FloatNullableFilter<"Shape"> | number | null
+    points?: JsonNullableFilter<"Shape">
+    rotation?: FloatNullableFilter<"Shape"> | number | null
+    lineType?: EnumLineTypeFilter<"Shape"> | $Enums.LineType
+    color?: StringFilter<"Shape"> | string
+    fillColor?: StringNullableFilter<"Shape"> | string | null
+    createdAt?: DateTimeFilter<"Shape"> | Date | string
+    updatedAt?: DateTimeFilter<"Shape"> | Date | string
   }
 
   export type CanvasCreateWithoutShapesInput = {
@@ -9708,8 +8981,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutCanvasesInput
-    shapes?: ShapeCreateNestedManyWithoutCanvasInput
     history?: HistoryCreateNestedManyWithoutCanvasInput
+    shapes?: ShapeCreateNestedManyWithoutCanvasInput
   }
 
   export type CanvasUncheckedCreateWithoutCollaboratorsInput = {
@@ -9723,8 +8996,8 @@ export namespace Prisma {
     shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    shapes?: ShapeUncheckedCreateNestedManyWithoutCanvasInput
     history?: HistoryUncheckedCreateNestedManyWithoutCanvasInput
+    shapes?: ShapeUncheckedCreateNestedManyWithoutCanvasInput
   }
 
   export type CanvasCreateOrConnectWithoutCollaboratorsInput = {
@@ -9739,7 +9012,7 @@ export namespace Prisma {
     password: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    canvases?: CanvasCreateNestedManyWithoutOwnerInput
+    canvases?: CanvasCreateNestedOneWithoutOwnerInput
   }
 
   export type UserUncheckedCreateWithoutCollaborationsInput = {
@@ -9749,7 +9022,7 @@ export namespace Prisma {
     password: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    canvases?: CanvasUncheckedCreateNestedManyWithoutOwnerInput
+    canvases?: CanvasUncheckedCreateNestedOneWithoutOwnerInput
   }
 
   export type UserCreateOrConnectWithoutCollaborationsInput = {
@@ -9779,8 +9052,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutCanvasesNestedInput
-    shapes?: ShapeUpdateManyWithoutCanvasNestedInput
     history?: HistoryUpdateManyWithoutCanvasNestedInput
+    shapes?: ShapeUpdateManyWithoutCanvasNestedInput
   }
 
   export type CanvasUncheckedUpdateWithoutCollaboratorsInput = {
@@ -9794,8 +9067,8 @@ export namespace Prisma {
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    shapes?: ShapeUncheckedUpdateManyWithoutCanvasNestedInput
     history?: HistoryUncheckedUpdateManyWithoutCanvasNestedInput
+    shapes?: ShapeUncheckedUpdateManyWithoutCanvasNestedInput
   }
 
   export type UserUpsertWithoutCollaborationsInput = {
@@ -9816,7 +9089,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    canvases?: CanvasUpdateManyWithoutOwnerNestedInput
+    canvases?: CanvasUpdateOneWithoutOwnerNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCollaborationsInput = {
@@ -9826,7 +9099,7 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    canvases?: CanvasUncheckedUpdateManyWithoutOwnerNestedInput
+    canvases?: CanvasUncheckedUpdateOneWithoutOwnerNestedInput
   }
 
   export type CanvasCreateWithoutHistoryInput = {
@@ -9840,8 +9113,8 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutCanvasesInput
-    shapes?: ShapeCreateNestedManyWithoutCanvasInput
     collaborators?: CollaborationCreateNestedManyWithoutCanvasInput
+    shapes?: ShapeCreateNestedManyWithoutCanvasInput
   }
 
   export type CanvasUncheckedCreateWithoutHistoryInput = {
@@ -9855,8 +9128,8 @@ export namespace Prisma {
     shareToken?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    shapes?: ShapeUncheckedCreateNestedManyWithoutCanvasInput
     collaborators?: CollaborationUncheckedCreateNestedManyWithoutCanvasInput
+    shapes?: ShapeUncheckedCreateNestedManyWithoutCanvasInput
   }
 
   export type CanvasCreateOrConnectWithoutHistoryInput = {
@@ -9886,8 +9159,8 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutCanvasesNestedInput
-    shapes?: ShapeUpdateManyWithoutCanvasNestedInput
     collaborators?: CollaborationUpdateManyWithoutCanvasNestedInput
+    shapes?: ShapeUpdateManyWithoutCanvasNestedInput
   }
 
   export type CanvasUncheckedUpdateWithoutHistoryInput = {
@@ -9901,20 +9174,8 @@ export namespace Prisma {
     shareToken?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    shapes?: ShapeUncheckedUpdateManyWithoutCanvasNestedInput
     collaborators?: CollaborationUncheckedUpdateManyWithoutCanvasNestedInput
-  }
-
-  export type CanvasCreateManyOwnerInput = {
-    id?: string
-    name: string
-    zoomLevel?: number
-    panX?: number
-    panY?: number
-    isReadOnly?: boolean
-    shareToken?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
+    shapes?: ShapeUncheckedUpdateManyWithoutCanvasNestedInput
   }
 
   export type CollaborationCreateManyUsersInput = {
@@ -9922,48 +9183,6 @@ export namespace Prisma {
     canvasId: string
     role?: $Enums.Role
     joinedAt?: Date | string
-  }
-
-  export type CanvasUpdateWithoutOwnerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    zoomLevel?: FloatFieldUpdateOperationsInput | number
-    panX?: FloatFieldUpdateOperationsInput | number
-    panY?: FloatFieldUpdateOperationsInput | number
-    isReadOnly?: BoolFieldUpdateOperationsInput | boolean
-    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    shapes?: ShapeUpdateManyWithoutCanvasNestedInput
-    collaborators?: CollaborationUpdateManyWithoutCanvasNestedInput
-    history?: HistoryUpdateManyWithoutCanvasNestedInput
-  }
-
-  export type CanvasUncheckedUpdateWithoutOwnerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    zoomLevel?: FloatFieldUpdateOperationsInput | number
-    panX?: FloatFieldUpdateOperationsInput | number
-    panY?: FloatFieldUpdateOperationsInput | number
-    isReadOnly?: BoolFieldUpdateOperationsInput | boolean
-    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    shapes?: ShapeUncheckedUpdateManyWithoutCanvasNestedInput
-    collaborators?: CollaborationUncheckedUpdateManyWithoutCanvasNestedInput
-    history?: HistoryUncheckedUpdateManyWithoutCanvasNestedInput
-  }
-
-  export type CanvasUncheckedUpdateManyWithoutOwnerInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    zoomLevel?: FloatFieldUpdateOperationsInput | number
-    panX?: FloatFieldUpdateOperationsInput | number
-    panY?: FloatFieldUpdateOperationsInput | number
-    isReadOnly?: BoolFieldUpdateOperationsInput | boolean
-    shareToken?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CollaborationUpdateWithoutUsersInput = {
@@ -9987,6 +9206,20 @@ export namespace Prisma {
     joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type CollaborationCreateManyCanvasInput = {
+    id?: string
+    userId: string
+    role?: $Enums.Role
+    joinedAt?: Date | string
+  }
+
+  export type HistoryCreateManyCanvasInput = {
+    id?: string
+    action: string
+    data: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
   export type ShapeCreateManyCanvasInput = {
     id?: string
     type: $Enums.ShapeType
@@ -10004,18 +9237,46 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
-  export type CollaborationCreateManyCanvasInput = {
-    id?: string
-    userId: string
-    role?: $Enums.Role
-    joinedAt?: Date | string
+  export type CollaborationUpdateWithoutCanvasInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    users?: UserUpdateOneRequiredWithoutCollaborationsNestedInput
   }
 
-  export type HistoryCreateManyCanvasInput = {
-    id?: string
-    action: string
-    data: JsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
+  export type CollaborationUncheckedUpdateWithoutCanvasInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CollaborationUncheckedUpdateManyWithoutCanvasInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type HistoryUpdateWithoutCanvasInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type HistoryUncheckedUpdateWithoutCanvasInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type HistoryUncheckedUpdateManyWithoutCanvasInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    action?: StringFieldUpdateOperationsInput | string
+    data?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ShapeUpdateWithoutCanvasInput = {
@@ -10069,49 +9330,39 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type CollaborationUpdateWithoutCanvasInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    users?: UserUpdateOneRequiredWithoutCollaborationsNestedInput
-  }
-
-  export type CollaborationUncheckedUpdateWithoutCanvasInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type CollaborationUncheckedUpdateManyWithoutCanvasInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    joinedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type HistoryUpdateWithoutCanvasInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    data?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type HistoryUncheckedUpdateWithoutCanvasInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    data?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type HistoryUncheckedUpdateManyWithoutCanvasInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    action?: StringFieldUpdateOperationsInput | string
-    data?: JsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
 
 
+  /**
+   * Aliases for legacy arg types
+   */
+    /**
+     * @deprecated Use UserCountOutputTypeDefaultArgs instead
+     */
+    export type UserCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use CanvasCountOutputTypeDefaultArgs instead
+     */
+    export type CanvasCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = CanvasCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use UserDefaultArgs instead
+     */
+    export type UserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use CanvasDefaultArgs instead
+     */
+    export type CanvasArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = CanvasDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use ShapeDefaultArgs instead
+     */
+    export type ShapeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ShapeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use CollaborationDefaultArgs instead
+     */
+    export type CollaborationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = CollaborationDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use HistoryDefaultArgs instead
+     */
+    export type HistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = HistoryDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

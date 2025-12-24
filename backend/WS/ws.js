@@ -1,9 +1,17 @@
 import { WebSocketServer } from "ws";
 import dotenv from "dotenv";
 import prisma from '../config/db.js';
-import url from "url";
+import path from "path";
+// Global first
+dotenv.config({
+  path: path.resolve(process.cwd(), "../config/.env")
+});
 
-dotenv.config();
+// WS-specific
+dotenv.config({
+  path: path.resolve(process.cwd(), ".env"),
+  override: true
+});
 
 const server = new WebSocketServer({port: process.env.PORT});
 
@@ -47,11 +55,11 @@ server.on('connection', (ws, req) => {
                 console.log(`Client joined canvas ${canvasId}`);
                 
                 try{
-                    const shapes = await prisma.Shape.findMany({
+                    const shapes = await prisma.shape.findMany({
                         where: {canvasId},
                     });
-
-                    const collborators = await prisma.Collaboration.create({
+                    console.log('Fetched initial id:', userId, canvasId);
+                    const collborators = await prisma.collaboration.create({
                         data: {
                             canvasId,
                             userId,
@@ -111,16 +119,16 @@ server.on('connection', (ws, req) => {
                 }
                 try{
                     console.log('Draw shape request:', shape);
-                    const shapeData = await prisma.Shape.create({
+                    const shapeData = await prisma.shape.create({
                         data: {
                             canvas:{
                                 connect: {id: canvasId}
                             },
                             type: shapeType,
-                            x: shape.x,
-                            y: shape.y,
-                            width: shape.width || null,
-                            height: shape.height || null,
+                            x: shape.startPos.x, 
+                            y: shape.startPos.y,
+                            width: Math.abs(shape.endPos.x - shape.startPos.x) || 0,
+                            height: Math.abs(shape.endPos.y - shape.startPos.y) || 0,
                             radius: shape.radius || null,
                             points: shape.points || null,
                             rotation: shape.rotation || 0,
@@ -130,7 +138,7 @@ server.on('connection', (ws, req) => {
                         }
                     });
                     console.log('Shape saved:', shapeData);
-                    await prisma.History.create({
+                    await prisma.history.create({
                         data: {
                             canvasId,
                             action: "add_shape",

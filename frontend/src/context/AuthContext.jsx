@@ -36,7 +36,11 @@ export function AuthProvider({ children }){
             const data = await res.json();
             setUser(data.user); 
             localStorage.setItem("Token", data.authentication.token);
-            localStorage.setItem("userId", data.user.id);
+            localStorage.setItem('userInfo', JSON.stringify({
+                id: user.id,
+                username: user.username,
+                email: user.email
+            }));
             
             let userId = data.user.id;
             let canvasId= localStorage.getItem("canvasId") || null;
@@ -59,7 +63,7 @@ export function AuthProvider({ children }){
                 const canvasData = await resC.json();
                 canvasId = canvasData.canvasId;
             }
-            localStorage.setItem("canvasId", canvasId);
+            localStorage.setItem("currentCanvasId", canvasId);
             
             return {canvasId, userId};
         } catch (err){
@@ -69,15 +73,14 @@ export function AuthProvider({ children }){
 
     async function signup(name, email, password) {
         try{
-            const res = await fetch(
-                "http://localhost:3000/auth/signup",{
+            const res = await fetch("http://localhost:3000/auth/signup",{
                     method: "POST",
                     body: JSON.stringify({
                         username: name, 
                         mail: email,
                         password
                     }),
-                     headers: { "Content-Type": "application/json" },
+                    // headers: { "Content-Type": "application/json" },
                 }
             );
             
@@ -89,7 +92,11 @@ export function AuthProvider({ children }){
 
             setUser(data.user);
 
-            localStorage.setItem("userId", `${JSON.stringify(data.user.id)}`);
+            localStorage.setItem("userInfo", JSON.stringify({
+                id: user.id,
+                username: user.username,
+                email: user.email
+            }));
             return data;
         }catch (err) {
             alert(err.message);

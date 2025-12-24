@@ -1,5 +1,4 @@
 import React, { useRef, useEffect } from "react";
-import { CanvasContext } from "../context/CanvasContext";
 import useCanvasDrawing from "../hooks/useCanvas";
 import { Header } from "./Header";
 import { BottomToolbar } from "./Bottom";

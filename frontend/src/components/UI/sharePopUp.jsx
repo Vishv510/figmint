@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 export function SharePopUp({isOpen, onClose, children}){
     useEffect(() => {
         const handleEsc = (e) => {
-        if (e.key === "Escape") onClose();
+            if (e.key === "Escape") onClose();
         };
         document.addEventListener("keydown", handleEsc);
         return () => document.removeEventListener("keydown", handleEsc);

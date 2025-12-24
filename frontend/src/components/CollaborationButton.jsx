@@ -1,39 +1,37 @@
 import { useState } from "react";
 import { SharePopUp } from "./UI/sharePopUp";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Users } from "lucide-react";
 
 export function CollaborationButton() {
-    const [isOpen, setIsOpen] = useState();
+    const [isOpen, setIsOpen] = useState(false);
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token");
+    const canvasId = localStorage.getItem("canvasId");
+
     const handleCollaborationClick = () => {
-        setIsOpen(true);
+        if (!token) {
+            navigate("/signup"); // Use hook instead of component
+        } else {
+            setIsOpen(true);
+        }
     }
 
-    return <>
-        <button onClick={handleCollaborationClick} type='button' className="flex cursor-pointer m-3">
-            <div className="mr-3">
-                <svg aria-hidden="true" focusable="false" role="img" viewBox="0 0 24 24" className="w-5 h-5" fill="none" strokeWidth="2" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-                    <g strokeWidth="1.5">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        <path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path>
-                    </g>
-                </svg>
-            </div>
-            <div className="">
-                Live collaboration...
-            </div>
-        </button>
+    return (
+        <>
+            <button onClick={handleCollaborationClick} className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded">
+                <Users className="w-5 h-5 text-indigo-500" />
+                <span className="text-sm font-medium">Live Collaboration</span>
+            </button>
 
-        {!localStorage.getItem("token") && isOpen ?
-            // fetch canvasid
-                <Navigate to="/signup" replace />
-            :
-            <SharePopUp>
-                share canvas
-            </SharePopUp> 
-            //   i want to travel now localhost:5173/auth/signup
-        }
-    </>
+            {isOpen && (
+                <SharePopUp isOpen={isOpen} onClose={() => setIsOpen(false)}>
+                    <div className="p-4">
+                        <h3 className="font-bold">Share Canvas</h3>
+                        <code className="block p-2 bg-gray-100 rounded mt-2">{canvasId}</code>
+                    </div>
+                </SharePopUp>
+            )}
+        </>
+    );
 }

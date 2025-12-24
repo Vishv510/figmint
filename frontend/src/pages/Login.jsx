@@ -20,28 +20,29 @@ export default function Login() {
       const data = await login(email, password);  // 🔥 call backend login
       console.log("Logged in: ", data);           // redirect after login
       
-      // const canvasId = localStorage.getItem("canvasId");
-      // if(canvasId){
-      //   navigate("/canvas");
-      //   return ;
-      // }
+      const canvasId = localStorage.getItem("canvasId");
+      if(canvasId){
+        navigate("/canvas");
+        return ;
+      }
 
-      // const res = await fetch("http://localhost:3000/canvas", {
-      //   method: "POST",
-      //   headers: {
-      //     "authorization": `Bearer ${localStorage.getItem("Token")}`,
-      //   },
-      //   body: JSON.stringify({
-      //     name : "My Canvas"
-      //   })
-      // });
-      // console.log(res);
-      // if(!res.ok)
-      //   throw new Error("canvas creation failed");
+      const res = await fetch("http://localhost:3000/canvas", {
+        method: "POST",
+        headers: {
+          "authorization": `Bearer ${localStorage.getItem("Token")}`,
+        },
+        body: JSON.stringify({
+          name : "My Canvas"
+        })
+      });
+      console.log(res);
+      if(!res.ok)
+        throw new Error("canvas creation failed");
       
       navigate("/canvas");
       // localStorage.setItem("canvasId", canvas.id);
     } catch (err) {
+      console.error("Login error: ", err);
       setError(err.message || "Login failed. Try again.");
     } finally {
       setLoading(false);

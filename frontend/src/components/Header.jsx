@@ -1,60 +1,57 @@
 import { AlignJustify } from "lucide-react";
-import { useCanvas } from "../context/CanvasContext";
 import { useAuth } from "../hooks/useAuth.js";
 import { SharePopUp } from "./UI/sharePopUp.jsx";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { UpperToolbar } from "./UpperToolbar.jsx";
+import { canvasContext } from "../context/canvasContext";
 
 export function Header() {
-    const { canvasId, setCanvasId } = useCanvas();
-    const { user } = useAuth();
-    const [open, setOpen] = useState();
+    const { canvasId, setCanvasId, userID } = useContext(canvasContext); // Use Context directly
+    const [open, setOpen] = useState(false);
+    const [canvasDetails, setCanvasDetails] = useState(null);
 
     async function shareCanvas(){
         if(!canvasId){
             try{
                 const res = await fetch("http://localhost:3000/canvas/", {
-                    body: { user },
+                    method: "POST",
                     headers: {
-                        "authorization" : toString(localStorage.getItem("token"))
+                        "Content-Type": "application/json",
+                        "authorization": `Bearer ${localStorage.getItem("Token")}`,
                     },
-                    method: "POST"
+                    body: JSON.stringify({ userId: userID }) // Body must be stringified
                 });
 
-                if(!res){
-                    console.log("something error in header.jsx in line 23");
-                }
                 const data = await res.json();
-                const id = data.id;
-                setCanvasId(id);
-            }catch(err){
-                console.error("Fetch error in Header.jsx:", err);
+                // if(data.id) setCanvasId(data.id);
+                setCanvasDetails(data);
+            } catch(err){
+                console.error("Fetch error:", err);
             }
         }
-
         setOpen(true);
     }
 
-    return <>
-        <div className="flex justify-between mt-3">
-            <div >
-                <button className="ml-6 p-2 rounded bg-gray-200 dark:bg-gray-400 hover:shadow">
-                    <AlignJustify  className="w-5 h-5 dark:color:white" />
-                </button>
-            </div>
+    return (
+        <div className="flex justify-between items-center p-2 border-b bg-white z-20 relative">
+            <button className="ml-4 p-2 rounded bg-gray-100 hover:bg-gray-200">
+                <AlignJustify className="w-5 h-5" />
+            </button>
+            
             <UpperToolbar />
-            <div>
-                <button className="bg-indigo-400 rounded h-10 w-16 mr-6" onClick={shareCanvas}>
-                    Share
-                </button>
-            </div>
-        </div>
+            
+            <button className="bg-indigo-500 text-white px-4 py-2 rounded mr-4 hover:bg-indigo-600 transition" onClick={shareCanvas}>
+                Share
+            </button>
 
-        {open && (
-            <SharePopUp isOpen={open} onClose={() => setOpen(false)}>
-                <p>This is your room Id, copy and share it </p>
-                <p className="font-bold">{`${canvasId}`}</p>
-            </SharePopUp>
-        )}
-    </>
+            {open && (
+                <SharePopUp isOpen={open} onClose={() => setOpen(false)}>
+                    <div className="p-4">
+                        <p className="text-sm text-gray-600">Share this Room ID with collaborators:</p>
+                        <p className="font-mono bg-gray-100 p-2 mt-2 rounded border">{canvasDetails || "Generating..."}</p>
+                    </div>
+                </SharePopUp>
+            )}
+        </div>
+    );
 }

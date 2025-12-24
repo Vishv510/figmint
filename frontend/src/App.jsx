@@ -7,14 +7,14 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import DashBoard from "./pages/Dashboard.jsx";
 import "./App.css";
-import { Canvas } from "./pages/Canvas.jsx";
+import CreateCanvas from "./pages/CreateCanvas.jsx";
 
-function PrivateRoute({ children }) {
-  const { user } = useAuth();
-  return user ? children : <Navigate to="/login" />;
-}
 
-export default function App() {
+function App() {
+  function PrivateRoute({ children }) {
+    const { user } = useAuth();
+    return user ? children : <Navigate to="/login" />;
+  }
   return (
     <AuthProvider>
       <CanvasProvider>
@@ -27,7 +27,7 @@ export default function App() {
               path="/canvas"
               element={
                 <PrivateRoute>
-                  <Canvas />
+                  <CreateCanvas />
                 </PrivateRoute>
               }
             />
@@ -37,3 +37,5 @@ export default function App() {
     </AuthProvider>
   );
 }
+
+export default App

@@ -3,7 +3,20 @@ import prisma from '../../config/db.js';
 export const createCanvas = async (req, res) => {
     try{
         console.log("You are reach in createCanvas endpoint");
-        const canvas = await prisma.Canvas.create({
+        console.log("Request body: ", req.user);
+
+        const existingCanvas = await prisma.canvas.findFirst({
+            where: { ownerId: req.user._id }
+        });
+
+        if (existingCanvas) {
+            return res.status(200).json({
+                message: "User already has a canvas",
+                canvasId: existingCanvas.id
+            });
+        }
+
+        const canvas = await prisma.canvas.create({
             data: {
                 name: req.body.name || "My Canvas",
                 ownerId: req.user._id,
@@ -14,11 +27,13 @@ export const createCanvas = async (req, res) => {
                 shareToken: req.body.shareToken || null,
             }
         });
+        console.log("Canvas created: ", canvas);
         res.status(201).json({
             message: "successfully created canvas",
             canvasId: canvas.id
         });
     }catch(err){
+        console.error("Error creating canvas:", err);
         res.status(500).json({
             message: err.message || "Internal server error."
         });

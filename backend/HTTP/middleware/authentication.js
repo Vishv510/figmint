@@ -18,7 +18,7 @@ const authentication = async (req, res, next) => {
             _id: decoded.id
         }
 
-        console.log("Succes fully doen middelware");
+        console.log("Succes fully done middleware");
         next();
     }catch( err){
         console.error(err);

@@ -1,103 +1,161 @@
-// drawShape.js
+export const drawShape = (ctx, shape) => {
+    if(!shape || !ctx) return;
+    const { type, endPos, startPos } = shape;
 
-export function drawShape(ctx, shape) {
-  if (!ctx || !shape) return;
+    console.log("drawing shape: ", shape);
+    console.log("on ctx: ", ctx);
+    
+    switch(type) {
+        case "circle": {
+            const radius = Math.sqrt(Math.pow(endPos.x - startPos.x, 2) + Math.pow(endPos.y - endPos.y, 2));
+            
+            ctx.beginPath();
+            ctx.arc(startPos.x, startPos.y, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+            break;
+        }
 
-  const { type, x, y, width, height, radius, points, text } = shape;
+        case "rectangle": {
+            const width = endPos.x - startPos.x;
+            const height = endPos.y - startPos.y;
+            ctx.beginPath();
+            ctx.strokeRect(startPos.x, startPos.y, width, height);
+            break;
+        }
 
-  ctx.beginPath();
-  ctx.lineWidth = shape.strokeWidth || 2;
-  ctx.strokeStyle = shape.color || "#000";
-  ctx.fillStyle = shape.fill || "transparent";
+        case "diamond": {
+            const midX = (startPos.x + endPos.x) / 2;
+            const midY = (startPos.y + endPos.y) / 2;
+            ctx.beginPath();
+            ctx.moveTo(midX, startPos.y);
+            ctx.lineTo(endPos.x, midY);
+            ctx.lineTo(midX, endPos.y);
+            ctx.lineTo(startPos.x, midY);
+            ctx.closePath();
+            ctx.stroke();
+            break;
+        }
 
-  const shapeType = type.toLowerCase();
-  switch (shapeType) {
-    case "rectangle":
-      ctx.rect(x, y, width, height);
-      ctx.fill();
-      ctx.stroke();
-      break;
+        case "line": {
+            ctx.beginPath();
+            ctx.moveTo(startPos.x, startPos.y);
+            ctx.lineTo(endPos.x, endPos.y);
+            ctx.stroke();
+            break;
+        }
 
-    case "circle":
-      ctx.arc(x, y, radius, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.stroke();
-      break;
+        case "pencil": {
+            console.log("drawing pencil with points: ", endPos);
+            ctx.beginPath();
+            ctx.moveTo(startPos.x, startPos.y);
+            for (let point of endPos) {
+                ctx.lineTo(point.x, point.y);
+            }
+            ctx.stroke();
+            break;
+        }
 
-    case "line":
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + width, y + height);
-      ctx.stroke();
-      break;
+        case "arrow": {
+            ctx.beginPath();
+            ctx.moveTo(startPos.x, startPos.y);
+            ctx.lineTo(endPos.x, endPos.y);
+            ctx.stroke();
 
-    case "arrow": {
-      // main line
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + width, y + height);
+            const arrowHeadLength = 15; // length of head in pixels
+            const arrowHeadAngle = Math.PI / 6; // 30 degrees
+            const angle = Math.atan2(endPos.y - startPos.y, endPos.x - startPos.x);
 
-      // arrowhead
-      const angle = Math.atan2(height, width);
-      const headLength = 10;
+            const arrowPoint1X = endPos.x - arrowHeadLength * Math.cos(angle - arrowHeadAngle);
+            const arrowPoint1Y = endPos.y - arrowHeadLength * Math.sin(angle - arrowHeadAngle);
+            const arrowPoint2X = endPos.x - arrowHeadLength * Math.cos(angle + arrowHeadAngle);
+            const arrowPoint2Y = endPos.y - arrowHeadLength * Math.sin(angle + arrowHeadAngle);
+            
+            ctx.beginPath();
+            ctx.moveTo(endPos.x, endPos.y);
+            ctx.lineTo(arrowPoint1X, arrowPoint1Y);
+            ctx.moveTo(endPos.x, endPos.y);
+            ctx.lineTo(arrowPoint2X, arrowPoint2Y);
+            ctx.stroke();
+            break;
+        }
 
-      ctx.moveTo(x + width, y + height);
-      ctx.lineTo(
-        x + width - headLength * Math.cos(angle - Math.PI / 6),
-        y + height - headLength * Math.sin(angle - Math.PI / 6)
-      );
-      ctx.moveTo(x + width, y + height);
-      ctx.lineTo(
-        x + width - headLength * Math.cos(angle + Math.PI / 6),
-        y + height - headLength * Math.sin(angle + Math.PI / 6)
-      );
-      ctx.stroke();
-      break;
+        case "text": {
+            const text = shape.text || "";
+            const fontSize = shape.fontSize || 20;
+            const fontFamily = "Arial";
+
+            ctx.font = `${fontSize}px ${fontFamily}`;
+            ctx.textBaseline = "middle";
+
+            ctx.fillText(text, startPos.x, startPos.y);
+
+            if(shape.isEditing){
+                const  textWidth = ctx.measureText(text).width;
+                ctx.beginPath();
+
+                ctx.moveTo(startPos.x + textWidth + 2, startPos.y);
+                ctx.lineTo(startPos.x + textWidth + 2, startPos.y + fontSize);
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+            break;
+        }
+
+        case "eraser": {
+            // Draw eraser cursor visualization
+            const eraserSize = shape.size || 20; // Default size 20
+            const x = endPos.x;
+            const y = endPos.y;
+            const erasePath = shape.erasePath || [];
+
+            const originalStrokeStyle = ctx.strokeStyle;
+            const originalLineWidth = ctx.lineWidth;
+
+           // Draw the eraser path (trail showing where eraser moved)
+            if (erasePath.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(erasePath[0].x, erasePath[0].y);
+                for (let i = 1; i < erasePath.length; i++) {
+                    ctx.lineTo(erasePath[i].x, erasePath[i].y);
+                }
+                ctx.strokeStyle = "rgba(255, 0, 0, 0.3)"; // Semi-transparent red trail
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // Draw outer circle at current position
+            ctx.beginPath();
+            ctx.arc(x, y, eraserSize, 0, 2 * Math.PI);
+            ctx.strokeStyle = "#ff0000";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw crosshair
+            ctx.beginPath();
+            ctx.moveTo(x - eraserSize, y);
+            ctx.lineTo(x + eraserSize, y);
+            ctx.moveTo(x, y - eraserSize);
+            ctx.lineTo(x, y + eraserSize);
+            ctx.strokeStyle = "#ff0000";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Draw center dot
+            ctx.beginPath();
+            ctx.arc(x, y, 2, 0, 2 * Math.PI);
+            ctx.fillStyle = "#ff0000";
+            ctx.fill();
+
+            // Restore original styles
+            ctx.strokeStyle = originalStrokeStyle;
+            ctx.lineWidth = originalLineWidth;
+            break;
+        }
+
+        default:
+            break;
     }
 
-    case "diamond":
-      ctx.moveTo(x, y - height / 2);
-      ctx.lineTo(x + width / 2, y);
-      ctx.lineTo(x, y + height / 2);
-      ctx.lineTo(x - width / 2, y);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      break;
-
-    case "freehand":
-      if (points && points.length > 1) {
-        ctx.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < points.length; i++) {
-          ctx.lineTo(points[i].x, points[i].y);
-        }
-        ctx.stroke();
-      }
-      break;
-
-    case "text":
-      ctx.font = `${shape.fontSize || 16}px Arial`;
-      ctx.fillStyle = shape.color || "black";
-      ctx.fillText(text || "", x, y);
-      break;
-
-    case "eraser": 
-      if(points && points.length > 1){
-        ctx.strokeStyle = shape.color || "#ffffff";
-        ctx.lineWidth = shape.strokeWidth || 10;
-        ctx.lineCap = "round";
-
-        ctx.beginPath();
-        ctx.moveTo(points[0].x, points[0].y);
-        for(let i=1; i< points.length; i++){
-          ctx.lineTo(points[i].x, points[i].y);
-        }
-
-        ctx.stroke();
-      }
-      break;
-
-    default:
-      console.warn("Unknown shape type:", type, shape);
-  }
-
-  ctx.closePath();
+    ctx.closePath();
 }

@@ -2,8 +2,17 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import router from './routes/router.js';
+import path from "path";
+// Global first
+dotenv.config({
+  path: path.resolve(process.cwd(), "../config/.env")
+});
 
-dotenv.config();
+// WS-specific
+dotenv.config({
+  path: path.resolve(process.cwd(), ".env"),
+  override: true
+});
 const app = express();
 const PORT = process.env.PORT || 3000;
 
