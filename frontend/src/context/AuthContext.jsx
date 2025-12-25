@@ -37,9 +37,9 @@ export function AuthProvider({ children }){
             setUser(data.user); 
             localStorage.setItem("Token", data.authentication.token);
             localStorage.setItem('userInfo', JSON.stringify({
-                id: user.id,
-                username: user.username,
-                email: user.email
+                id: data.user.id,
+                username: data.user.username,
+                email: data.user.email
             }));
             
             let userId = data.user.id;
@@ -80,7 +80,7 @@ export function AuthProvider({ children }){
                         mail: email,
                         password
                     }),
-                    // headers: { "Content-Type": "application/json" },
+                    headers: { "Content-Type": "application/json" },
                 }
             );
             
@@ -93,9 +93,9 @@ export function AuthProvider({ children }){
             setUser(data.user);
 
             localStorage.setItem("userInfo", JSON.stringify({
-                id: user.id,
-                username: user.username,
-                email: user.email
+                id: data.user.id,
+                username: data.user.username,
+                email: data.user.email
             }));
             return data;
         }catch (err) {
@@ -104,7 +104,7 @@ export function AuthProvider({ children }){
         }
     } 
 
-     async function logout(){
+    async function logout(){
         await fetch(
             "http://localhost:3000/logout",{
                 method: "POST",

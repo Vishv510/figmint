@@ -1,4 +1,4 @@
-import { createContext, useRef, useState, useEffect } from "react";
+import { createContext, useRef, useState, useEffect, useCallback } from "react";
 import wsClient from "../utils/ws";
 
 export const canvasContext = createContext(null);
@@ -17,9 +17,9 @@ export function CanvasProvider({ children }) {
   const isPanning = useRef(false);
   const lastPanPoint = useRef({ x: 0, y: 0 });
   const [zoomLevel, setZoomLevel] = useState(1);
-  const canvasID = localStorage.getItem("currentCanvasId");
-  const userID = JSON.parse(localStorage.getItem("userInfo")).id;
-  // const userId = localStorage.getItem("userId");
+  // const canvasID = localStorage.getItem("currentCanvasId") || null;
+  // const userID = JSON.parse(localStorage.getItem("userInfo")).id || null;
+  // const userId = JSON.parse(localStorage.getItem("userInfo")).id || null;
   
   useEffect(() => {
     // Get data from localStorage
@@ -27,34 +27,37 @@ export function CanvasProvider({ children }) {
     const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
     const savedUserID = userInfo.id;
 
-    if (savedCanvasID && savedUserID) {
+    let isSubscribed = true;
+    if (savedCanvasID && savedUserID && isSubscribed) {
       console.log("Auto-connecting to WebSocket...");
-      initializeWebSocket(savedCanvasID, savedUserID);
+      if (!isConnected) {
+            initializeWebSocket(savedCanvasID, savedUserID);
+      }
     }
 
-    // Cleanup function: runs when the app closes or component unmounts
     return () => {
-      // console.log("Cleaning up WebSocket...");
-      wsClient.disconnect();
-      // This prevents the "multiple logs" by clearing old listeners
-      if (wsClient.eventHandlers) {
-        wsClient.eventHandlers.clear();
-      }
+        isSubscribed = false;
+        wsClient.disconnect();
     };
   }, []);
 
 
   // Initialize WebSocket connection
-  const initializeWebSocket = async (canvasId, userId, role = 'EDITOR') => {
+  const initializeWebSocket = useCallback( async (canvasId, userId, role = 'EDITOR') => {
     try {
-      await wsClient.connect(canvasId || canvasID, userId || userID, role);
+      await wsClient.connect(canvasId , userId , role);
       setIsConnected(true);
-      console.log(userID, 'connected to canvas', canvasID);
+      console.log(userId, 'connected to canvas', canvasId);
       // Handle initial shapes
       wsClient.on('initialShapes', (data) => {
         console.log('Received initial shapes:', data);
-        setShapes(data.data || []);
-        setCollaborators(data.collaborators_space);
+        if (data) {
+          const shapesData = Array.isArray(data) ? data : (data.data || []);
+          setShapes(shapesData);
+          if (data.collaborators_space) {
+              setCollaborators(data.collaborators_space);
+          }
+        }
       });
 
       // Handle new shape from other users
@@ -108,7 +111,7 @@ export function CanvasProvider({ children }) {
       console.error('Failed to initialize WebSocket:', error);
       setIsConnected(false);
     }
-  };
+  }, []);
 
   // Disconnect WebSocket on unmount
   useEffect(() => {
@@ -173,10 +176,16 @@ export function CanvasProvider({ children }) {
   // Delete shape via WebSocket
   const deleteShapeFromServer = (shapeId) => {
     // Remove from local state immediately
-    setShapes(prev => prev.filter(shape => shape.id !== shapeId));
-    
-    // Send delete request to server
-    wsClient.deleteShape(shapeId);
+    setShapes(prev => {
+      const exists = prev.find(s => s.id === shapeId);
+      if (!exists) return prev;
+      
+      // 2. If it exists, send to server ONLY ONCE
+      wsClient.deleteShape(shapeId);
+      
+      // 3. Filter it out locally
+      return prev.filter(shape => shape.id !== shapeId);
+    });
   };
 
   // Move shape via WebSocket
@@ -217,9 +226,8 @@ export function CanvasProvider({ children }) {
         deleteShapeFromServer,
         moveShapeOnServer,
         wsClient,
+        // userID: userId,
         collaborators,
-        canvasID,
-        userID,
       }}
     >
       {children}

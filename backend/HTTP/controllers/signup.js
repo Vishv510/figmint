@@ -4,7 +4,7 @@ import { hashPassword } from '../utils/encryp.js';
 const signupController = async (req, res) => {
     const { username, mail, password } = req.body;
     try{
-        const existingUser = await prisma.User.findUnique({
+        const existingUser = await prisma.user.findUnique({
             where: {
                 email: mail,
             }
@@ -19,7 +19,7 @@ const signupController = async (req, res) => {
 
         const encryptedPassword = await hashPassword(password);
 
-        const newUser = await prisma.User.create({
+        const newUser = await prisma.user.create({
             data:{
                 username: username,
                 email: mail,
