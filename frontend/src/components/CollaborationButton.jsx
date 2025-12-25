@@ -1,37 +1,94 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { SharePopUp } from "./UI/sharePopUp";
-import { useNavigate } from "react-router-dom";
-import { Users } from "lucide-react";
+import { canvasContext } from "../context/canvasContext";
 
 export function CollaborationButton() {
-    const [isOpen, setIsOpen] = useState(false);
-    const navigate = useNavigate();
-    const token = localStorage.getItem("token");
-    const canvasId = localStorage.getItem("canvasId");
+    
+    const { canvasId, userID, initializeWebSocket } = useContext(canvasContext); // Use Context directly
+    const [openShare, setOpenShare] = useState(false);
+    const [openJoin, setOpenJoin] = useState(false);
+    const [canvasDetails, setCanvasDetails] = useState(null);
+    const [joinCanvasDetails, setJoinCanvasDetails] = useState(null);
 
-    const handleCollaborationClick = () => {
-        if (!token) {
-            navigate("/signup"); // Use hook instead of component
-        } else {
-            setIsOpen(true);
+    async function shareCanvas(){
+        if(!canvasId){
+            try{
+                const res = await fetch("http://localhost:3000/canvas/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "authorization": `Bearer ${localStorage.getItem("Token")}`,
+                    },
+                    body: JSON.stringify({ userId: userID }) // Body must be stringified
+                });
+
+                const data = await res.json();
+                // if(data.id) setCanvasId(data.id);
+                console.log("New canvas created for sharing:", data.canvasId);
+                setCanvasDetails(data.canvasId);
+            } catch(err){
+                console.error("Fetch error:", err);
+            }
         }
+        setOpenShare(true);
     }
+
+    function openJoinCanvas(){
+        setOpenJoin(true);
+    }
+    function joinCanvas(){
+        if (!joinCanvasDetails) {
+            alert("Please enter a Room ID");
+            return;
+        }
+
+        if (!userID) {
+            alert("You must be logged in to join a canvas");
+            return;
+        }
+
+        console.log("Joining canvas:", joinCanvasDetails);
+        // Logic to join canvas using entered ID
+
+        localStorage.setItem("currentCanvasId", joinCanvasDetails);
+        initializeWebSocket(joinCanvasDetails, userID);
+        setOpenJoin(false);
+        setJoinCanvasDetails("");
+    }
+
 
     return (
         <>
-            <button onClick={handleCollaborationClick} className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded">
-                <Users className="w-5 h-5 text-indigo-500" />
-                <span className="text-sm font-medium">Live Collaboration</span>
+            <button className="bg-indigo-500 text-white px-4 py-2 rounded mr-4 hover:bg-indigo-600 transition" onClick={openJoinCanvas}>
+                Join
             </button>
 
-            {isOpen && (
-                <SharePopUp isOpen={isOpen} onClose={() => setIsOpen(false)}>
+            <button className="bg-indigo-500 text-white px-4 py-2 rounded mr-4 hover:bg-indigo-600 transition" onClick={shareCanvas}>
+                Share
+            </button>
+
+
+            {openJoin && (
+                <SharePopUp isOpen={openJoin} onClose={() => setOpenJoin(false)}>
                     <div className="p-4">
-                        <h3 className="font-bold">Share Canvas</h3>
-                        <code className="block p-2 bg-gray-100 rounded mt-2">{canvasId}</code>
+                        <p className="text-sm text-gray-600">Enter Room ID to join:</p>
+                        <input type="text" className="w-full border p-2 mt-2 rounded" onChange={(e) => setJoinCanvasDetails(e.target.value)} />
+                        <button className="mt-4 bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition" onClick={joinCanvas}>
+                            Join
+                        </button>
                     </div>
                 </SharePopUp>
             )}
+
+            {openShare && (
+                <SharePopUp isOpen={openShare} onClose={() => setOpenShare(false)}>
+                    <div className="p-4">
+                        <p className="text-sm text-gray-600">Share this Room ID with collaborators:</p>
+                        <p className="font-mono bg-gray-100 p-2 mt-2 rounded border">{canvasDetails || "Generating..."}</p>
+                    </div>
+                </SharePopUp>
+            )}
+
         </>
     );
 }

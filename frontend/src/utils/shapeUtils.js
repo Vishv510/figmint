@@ -1,42 +1,53 @@
-export const isPointInShape = (x, y, shape, tolerance = 10, eraserSize) => { 
-    const { type, startPos, endPos = startPos } = shape; 
+export const isPointInShape = (px, py, shape, tolerance = 10, eraserSize) => { 
+    const { startPos, endPos = startPos } = shape; 
+    
+    const type = shape.type?.toLowerCase();
+    
+    // Normalize coordinates: Use database properties or start/end positions
+    const x = shape.x ?? shape.startPos?.x;
+    const y = shape.y ?? shape.startPos?.y;
+    const w = shape.width ?? (shape.endPos? shape.endPos.x - shape.startPos.x : 0);
+    const h = shape.height ?? (shape.endPos? shape.endPos.y - shape.startPos.y : 0);
+    
     switch(type) { 
         case "rectangle": { 
-            const minX = Math.min(startPos.x, endPos.x) - tolerance; 
-            const maxX = Math.max(startPos.x, endPos.x) + tolerance; 
-            const minY = Math.min(startPos.y, endPos.y) - tolerance; 
-            const maxY = Math.max(startPos.y, endPos.y) + tolerance; 
-            return x >= minX && x <= maxX && y >= minY && y <= maxY; 
+            const minX = Math.min(x, x + w) - tolerance; 
+            const maxX = Math.max(x, x + w) + tolerance; 
+            const minY = Math.min(y, y + h) - tolerance; 
+            const maxY = Math.max(y, y + h) + tolerance; 
+            return px >= minX && px <= maxX && py >= minY && py <= maxY; 
         } 
         case "circle": { 
-            const radius = Math.sqrt( Math.pow(endPos.x - startPos.x, 2) + Math.pow(endPos.y - startPos.y, 2) ); 
-            const distance = Math.sqrt( Math.pow(x - startPos.x, 2) + Math.pow(y - startPos.y, 2) ); 
+            const radius = shape.radius || Math.sqrt( w * w + h * h ); 
+            const distance = Math.sqrt( Math.pow(px - x, 2) + Math.pow(py - y, 2) ); 
             return distance <= radius + tolerance; 
         } 
         case "line": 
         case "arrow": { 
             // Distance from point to line segment 
-            const dist = distanceToLineSegment(x, y, startPos, endPos); 
+            const dist = distanceToLineSegment(px, py, startPos, endPos); 
             return dist <= tolerance; 
         } case "diamond": { 
             // Check if point is inside diamond bounds 
-            const minX = Math.min(startPos.x, endPos.x) - tolerance; 
-            const maxX = Math.max(startPos.x, endPos.x) + tolerance; 
-            const minY = Math.min(startPos.y, endPos.y) - tolerance; 
-            const maxY = Math.max(startPos.y, endPos.y) + tolerance; 
-            return x >= minX && x <= maxX && y >= minY && y <= maxY; 
+            const minX = Math.min(x, x + w) - tolerance; 
+            const maxX = Math.max(x, x + w) + tolerance; 
+            const minY = Math.min(y, y + h) - tolerance; 
+            const maxY = Math.max(y, y + h) + tolerance; 
+            return px >= minX && px <= maxX && py >= minY && py <= maxY; 
         } 
+
+        case "freehand":
         case "pencil": { 
             // Fix: Use shape.points instead of endPos for pencil array
             const pts = shape.points || [];
             for (let i = 0; i < pts.length - 1; i++) { 
-                const dist = distanceToLineSegment(x, y, pts[i], pts[i + 1]); 
+                const dist = distanceToLineSegment(px, py, pts[i], pts[i + 1]); 
                 if (dist <= tolerance) return true; 
             } 
             return false; 
         }
         case "text": { 
-            const { startPos, text, fontSize = 20 } = shape; 
+            const {  text, fontSize = 20 } = shape; 
             // Create a temporary canvas context to measure text width 
             // // const tempCanvas = document.createElement("canvas"); 
             // // const tempCtx = tempCanvas.getContext("2d");
@@ -46,34 +57,24 @@ export const isPointInShape = (x, y, shape, tolerance = 10, eraserSize) => {
             const textWidth = text.length * fontSize * 0.6; 
             const textHeight = fontSize; 
             const buffer = eraserSize || 10; 
-            return ( x >= startPos.x - buffer && x <= startPos.x + textWidth + buffer && y >= startPos.y - textHeight - buffer && y <= startPos.y + buffer ); 
+            return ( px >= x - buffer && px <= x + textWidth + buffer && py >= y - textHeight - buffer && py <= y + buffer ); 
         } 
         default: return false; 
     } 
 };
 
 const distanceToLineSegment = (px, py, p1, p2) => { 
-    const A = px - p1.x; 
-    const B = py - p1.y; 
-    const C = p2.x - p1.x; 
-    const D = p2.y - p1.y; 
-    const dot = A * C + B * D; 
-    const lenSq = C * C + D * D; 
-    let param = -1; 
+    if (!p1 || !p2 || p1.x === undefined || p2.x === undefined) {
+        return Infinity; 
+    }
+    const l2 = Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2);
+    if (l2 === 0) return Math.sqrt(Math.pow(px - p1.x, 2) + Math.pow(py - p1.y, 2));
     
-    if (lenSq !== 0) { 
-        param = dot / lenSq; 
-    } 
-    let xx, yy; 
-    if (param < 0) { 
-        xx = p1.x; yy = p1.y; 
-    } else if (param > 1) { 
-        xx = p2.x; yy = p2.y; 
-    } else { 
-        xx = p1.x + param * C; yy = p1.y + param * D; 
-    } 
+    let t = ((px - p1.x) * (p2.x - p1.x) + (py - p1.y) * (p2.y - p1.y)) / l2;
+    t = Math.max(0, Math.min(1, t));
     
-    const dx = px - xx; 
-    const dy = py - yy; 
-    return Math.sqrt(dx * dx + dy * dy); 
+    const closestX = p1.x + t * (p2.x - p1.x);
+    const closestY = p1.y + t * (p2.y - p1.y);
+    
+    return Math.sqrt(Math.pow(px - closestX, 2) + Math.pow(py - closestY, 2));
 };

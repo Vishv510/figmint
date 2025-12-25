@@ -13,7 +13,7 @@ dotenv.config({
   override: true
 });
 
-const server = new WebSocketServer({port: process.env.PORT});
+const server = new WebSocketServer({port: process.env.PORT , maxPayload: 1024 * 1024 * 10}); // 10 MB
 
 const canvasClient = new Map();
 
@@ -94,7 +94,7 @@ server.on('connection', (ws, req) => {
                 const { shape } = data;
                 const shapeType = typeof shape.type === "string" ? shape.type.toUpperCase() : null;
 
-                const allowedTypes = ["RECTANGLE", "CIRCLE", "LINE", "ARROW", "DIAMOND", "TEXT", "FREEHAND"];
+                const allowedTypes = ["RECTANGLE", "CIRCLE", "LINE", "ARROW", "DIAMOND", "TEXT", "PENCIL", "ERASER"];
                 if (!allowedTypes.includes(shapeType)) {
                     ws.send(JSON.stringify({
                         type: "error",
@@ -164,6 +164,7 @@ server.on('connection', (ws, req) => {
                 console.log('Delete shape request:', data);
                 const { id } = data;
                 if(!id) {
+                    console.error('Shape ID is required for deletion');
                     ws.send(JSON.stringify({
                         type: "error",
                         message: "Shape ID is required for deletion"
@@ -172,9 +173,9 @@ server.on('connection', (ws, req) => {
                 }
 
                 try{
-                    const deletedShape = await prisma.Shape.delete({
+                    const deletedShape = await prisma.shape.delete({
                         where: {
-                            id: data.id
+                            id: id
                         }
                     });
 
@@ -186,7 +187,7 @@ server.on('connection', (ws, req) => {
                         return;
                     }
 
-                    await prisma.History.create({
+                    await prisma.history.create({
                         data: {
                             canvas: {
                                 connect: {id: ws.canvasId}
@@ -196,15 +197,17 @@ server.on('connection', (ws, req) => {
                         }
                     });
 
-                    broadCast(JSON.stringify({type: 'shapeDeleted', data: deletedShape}), canvasId, ws);
+                    broadCast(JSON.stringify({type: 'deleteShape', data: {id}}), canvasId, ws);
                 }catch (err){
                     console.error("error deleting shape: ", err);
                     if(err.code === "P2025"){
+                        console.log(`Shape ${id} already deleted. Ignoring.`);
                         ws.send(JSON.stringify({
                             type: "error",
                             message: "Shape not found or already deleted"
                         }));
                     }else{
+                        console.error("Error deleting shape:", err);
                         ws.send(JSON.stringify({
                             type: "error",
                             message: "failed to deleted shape"

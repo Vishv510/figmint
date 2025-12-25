@@ -33,7 +33,7 @@ function Canvas () {
                 />
             </div>
 
-            <BottomToolbar />
+            {/* <BottomToolbar /> */}
         </div>
     )
 }

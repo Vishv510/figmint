@@ -111,7 +111,8 @@ class WebSocketClient {
     if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
-      // Queue message if not connected
+      const state = this.ws ? this.ws.readyState : 'NULL';
+      console.warn(`WebSocket not ready (State: ${state}). Queuing message:`, message.type);
       this.messageQueue.push(message);
     }
   }
@@ -149,6 +150,7 @@ class WebSocketClient {
 
   // Delete shape
   deleteShape(shapeId) {
+    console.log("WS Client sending delete request for ID:", shapeId);
     this.send({
       type: 'deleteShape',
       data: {
