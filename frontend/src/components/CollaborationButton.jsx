@@ -4,13 +4,14 @@ import { canvasContext } from "../context/canvasContext";
 
 export function CollaborationButton() {
     
-    const { canvasId, userID, initializeWebSocket } = useContext(canvasContext); // Use Context directly
+    const { canvasId, initializeWebSocket } = useContext(canvasContext); // Use Context directly
     const [openShare, setOpenShare] = useState(false);
     const [openJoin, setOpenJoin] = useState(false);
     const [canvasDetails, setCanvasDetails] = useState(null);
     const [joinCanvasDetails, setJoinCanvasDetails] = useState(null);
 
     async function shareCanvas(){
+        const userId = JSON.parse(localStorage.getItem("userInfo")).id;
         if(!canvasId){
             try{
                 const res = await fetch("http://localhost:3000/canvas/", {
@@ -19,7 +20,7 @@ export function CollaborationButton() {
                         "Content-Type": "application/json",
                         "authorization": `Bearer ${localStorage.getItem("Token")}`,
                     },
-                    body: JSON.stringify({ userId: userID }) // Body must be stringified
+                    body: JSON.stringify({ userId }) // Body must be stringified
                 });
 
                 const data = await res.json();
@@ -42,7 +43,8 @@ export function CollaborationButton() {
             return;
         }
 
-        if (!userID) {
+        const userId = JSON.parse(localStorage.getItem("userInfo")).id
+        if (!userId) {
             alert("You must be logged in to join a canvas");
             return;
         }
@@ -51,7 +53,7 @@ export function CollaborationButton() {
         // Logic to join canvas using entered ID
 
         localStorage.setItem("currentCanvasId", joinCanvasDetails);
-        initializeWebSocket(joinCanvasDetails, userID);
+        initializeWebSocket(joinCanvasDetails, userId);
         setOpenJoin(false);
         setJoinCanvasDetails("");
     }

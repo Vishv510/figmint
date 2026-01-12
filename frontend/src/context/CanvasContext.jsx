@@ -6,6 +6,7 @@ export const canvasContext = createContext(null);
 export function CanvasProvider({ children }) {
   const [shapes, setShapes] = useState([]);
   const [selectedShape, setSelectedShape] = useState(null);
+  const [connectionError, setConnectionError] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [collaborators, setCollaborators] = useState(null);
   const isDrawing = useRef(false);
@@ -17,9 +18,9 @@ export function CanvasProvider({ children }) {
   const isPanning = useRef(false);
   const lastPanPoint = useRef({ x: 0, y: 0 });
   const [zoomLevel, setZoomLevel] = useState(1);
-  // const canvasID = localStorage.getItem("currentCanvasId") || null;
-  // const userID = JSON.parse(localStorage.getItem("userInfo")).id || null;
-  // const userId = JSON.parse(localStorage.getItem("userInfo")).id || null;
+  const listenersRef = useRef(false);
+  const currentCanvasIdRef = useRef(null);
+  const lastErrorTimeRef = useRef(0);
   
   useEffect(() => {
     // Get data from localStorage
@@ -31,22 +32,54 @@ export function CanvasProvider({ children }) {
     if (savedCanvasID && savedUserID && isSubscribed) {
       console.log("Auto-connecting to WebSocket...");
       if (!isConnected) {
-            initializeWebSocket(savedCanvasID, savedUserID);
+        initializeWebSocket(savedCanvasID, savedUserID);
       }
     }
 
     return () => {
-        isSubscribed = false;
-        wsClient.disconnect();
+      isSubscribed = false;
+      wsClient.disconnect();
     };
   }, []);
 
 
   // Initialize WebSocket connection
   const initializeWebSocket = useCallback( async (canvasId, userId, role = 'EDITOR') => {
+    console.log("You are in InitailizeWebsocket");
+    console.log("CanvasId: " + canvasId);
+    console.log("userId: " + userId);
+
+     const isNewCanvas = currentCanvasIdRef.current !== canvasId;
+    
+    if (listenersRef.current && !isNewCanvas) {
+      console.log("Listeners already registered, skipping...");
+      return;
+    }
+
+    if (isNewCanvas && listenersRef.current) {
+      console.log("Switching to new canvas, cleaning up old connection...");
+      // Clean up old connection
+      wsClient.disconnect();
+      listenersRef.current = false;
+      setShapes([]); // Clear old shapes
+    }
+
     try {
       await wsClient.connect(canvasId , userId , role);
       setIsConnected(true);
+      setConnectionError(null);
+      currentCanvasIdRef.current = canvasId; 
+
+      // CRITICAL: Remove all existing listeners before adding new ones
+      // to prevent the "5x log" and duplicate execution bug.
+      wsClient.off('initialShapes'); 
+      wsClient.off('newShape');
+      wsClient.off('deleteShape');
+      wsClient.off('shapeMoved');
+      wsClient.off('liveShapeUpdate');
+      wsClient.off('userDisconnected');
+      wsClient.off('error');
+
       console.log(userId, 'connected to canvas', canvasId);
       // Handle initial shapes
       wsClient.on('initialShapes', (data) => {
@@ -55,7 +88,7 @@ export function CanvasProvider({ children }) {
           const shapesData = Array.isArray(data) ? data : (data.data || []);
           setShapes(shapesData);
           if (data.collaborators_space) {
-              setCollaborators(data.collaborators_space);
+            setCollaborators(data.collaborators_space);
           }
         }
       });
@@ -64,27 +97,54 @@ export function CanvasProvider({ children }) {
       wsClient.on('newShape', (data) => {
         console.log('New shape received:', data);
         setShapes(prev => {
-          // Replace temp shape with real shape from server
           if (data.tempId) {
-            return prev.map(shape => 
-              shape.id === data.tempId ? data.shapeData : shape
-            );
+            console.log(`Replacing temp shape ${data.tempId} with real shape ID ${data.shapeData.id}`);
+            
+            const updated = prev.map(shape => {
+              if (shape.id === data.tempId) {
+                console.log('Found and replaced temp shape');
+                return data.shapeData;
+              }
+              return shape;
+            });
+            
+            // Verify replacement happened
+            const foundReplacement = updated.some(s => s.id === data.shapeData.id);
+            if (!foundReplacement) {
+              console.warn('Temp shape not found, adding new shape instead');
+              return [...prev, data.shapeData];
+            }
+            
+            return updated;
           }
-          // Add new shape from other users
-          return [...prev, data.shapeData];
+          
+          // Add new shape from other users (not our temp shape)
+          const shapeId = data.shapeData?.id || data.id;
+          const exists = prev.some(s => s.id === shapeId);
+          
+          if (exists) {
+            console.log('Shape already exists, skipping:', shapeId);
+            return prev;
+          }
+          
+          console.log('Adding new shape from other user:', shapeId);
+          return [...prev, data.shapeData || data];
         });
+        console.log("All shapes: " + shapes);
       });
 
       // Handle live shape updates (real-time drawing preview)
       wsClient.on('liveShapeUpdate', (data) => {
         console.log('Live shape update:', data);
+        drawShape()
         // You can implement real-time cursor/drawing preview here
       });
 
       // Handle shape deletion
       wsClient.on('deleteShape', (data) => {
-        console.log('Shape deleted:', data);
+        console.log('Shape deleted: ', data);
         setShapes(prev => prev.filter(shape => shape.id !== data.id));
+        pendingDeletions.current.delete(data.id);
       });
 
       // Handle shape movement
@@ -102,14 +162,23 @@ export function CanvasProvider({ children }) {
 
       // Handle errors
       wsClient.on('error', (data) => {
-        const errorMsg = data?.message || "An unknown error occurred";
+        const now = Date.now();
+        console.log('ERROR - Full data object:', data);
+        console.log('ERROR - data type:', typeof data);
+        console.log('ERROR - data keys:', data ? Object.keys(data) : 'data is null/undefined');
+        
+        const errorMsg = data?.message || data?.error || data?.msg || JSON.stringify(data) || "An unknown error occurred";
+        
         console.error('WebSocket error:', errorMsg);
         alert(errorMsg);
+        lastErrorTimeRef.current = now;
       });
 
+      listenersRef.current = true;
     } catch (error) {
       console.error('Failed to initialize WebSocket:', error);
       setIsConnected(false);
+      setConnectionError(error.message || 'Failed to connect');
     }
   }, []);
 
@@ -117,6 +186,8 @@ export function CanvasProvider({ children }) {
   useEffect(() => {
     return () => {
       wsClient.disconnect();
+      listenersRef.current = false;
+      currentCanvasIdRef.current = null;
     };
   }, []);
 
@@ -162,7 +233,7 @@ export function CanvasProvider({ children }) {
   // Send shape to server via WebSocket
   const addShapeToServer = (shape) => {
     // Generate temporary ID
-    wsClient.drawShape(shape);
+    // wsClient.drawShape(shape);
     const tempId = `temp_${Date.now()}_${Math.random()}`;
     const shapeWithTempId = { ...shape, id: tempId };
     
@@ -170,22 +241,42 @@ export function CanvasProvider({ children }) {
     setShapes(prev => [...prev, shapeWithTempId]);
     
     // Send to server
-    // wsClient.drawShape(shape);
+    if (isConnected) {
+      wsClient.drawShape(shape, tempId);
+    } else {
+      console.warn('Not connected to server, shape only stored locally');
+      setConnectionError('Not connected - shape saved locally only');
+    }
   };
 
   // Delete shape via WebSocket
+  const pendingDeletions = useRef(new Set());
   const deleteShapeFromServer = (shapeId) => {
-    // Remove from local state immediately
-    setShapes(prev => {
-      const exists = prev.find(s => s.id === shapeId);
-      if (!exists) return prev;
-      
-      // 2. If it exists, send to server ONLY ONCE
+    if (pendingDeletions.current.has(shapeId)) {
+      console.log('Delete already pending for:', shapeId);
+      return;
+    }
+
+    // Handle temporary shapes (not yet synced to server)
+    if (shapeId.startsWith('temp_')) {
+      console.log('Removing temp shape locally (not synced to server yet):', shapeId);
+      setShapes(prev => prev.filter(shape => shape.id !== shapeId));
+      return;
+    }
+    
+    pendingDeletions.current.add(shapeId);
+    console.log("Sending delete to server for:", shapeId);
+    
+    setShapes(prev => prev.filter(shape => shape.id !== shapeId));
+    
+    if (isConnected) {
       wsClient.deleteShape(shapeId);
-      
-      // 3. Filter it out locally
-      return prev.filter(shape => shape.id !== shapeId);
-    });
+    } else {
+      console.warn('Not connected to server, delete queued');
+    }
+
+    // Clear from pending after a short delay or when confirmed
+    setTimeout(() => pendingDeletions.current.delete(shapeId), 1000);
   };
 
   // Move shape via WebSocket
@@ -196,7 +287,11 @@ export function CanvasProvider({ children }) {
     );
     
     // Send to server
-    wsClient.moveShape(shape);
+    if (isConnected) {
+      wsClient.moveShape(shape);
+    } else {
+      console.warn('Not connected to server, move only local');
+    }
   };
 
   return (
@@ -226,7 +321,6 @@ export function CanvasProvider({ children }) {
         deleteShapeFromServer,
         moveShapeOnServer,
         wsClient,
-        // userID: userId,
         collaborators,
       }}
     >
