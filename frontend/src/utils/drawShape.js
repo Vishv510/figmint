@@ -1,6 +1,6 @@
 export const drawShape = (ctx, shape) => {
     if(!shape || !ctx || !shape.type) return;
-    const {  endPos, startPos } = shape;
+    const { startPos } = shape;
 
     const type = shape.type.toLowerCase();
     const x = shape.x ?? shape.startPos?.x;
@@ -8,8 +8,8 @@ export const drawShape = (ctx, shape) => {
     const width = shape.width ?? (shape.endPos?.x - shape.startPos?.x);
     const height = shape.height ?? (shape.endPos?.y - shape.startPos?.y);
 
-    console.log("drawing shape: ", shape);
-    console.log("on ctx: ", ctx);
+    // console.log("drawing shape: ", shape);
+    // console.log("on ctx: ", ctx);
     
     switch(type) {
         case "circle": {

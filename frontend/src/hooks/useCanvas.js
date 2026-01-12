@@ -1,5 +1,5 @@
 import { useCallback, useContext, useRef, useState, useEffect } from "react";
-import { canvasContext } from "../context/canvasContext";
+import { canvasContext } from "../context/CanvasContext";
 import { drawShape } from "../utils/drawShape";
 import { isPointInShape } from "../utils/shapeUtils";
 
@@ -17,7 +17,7 @@ export const useCanvas = (mainCanvasRef, tempCanvasRef) => {
     addShapeToServer,
     deleteShapeFromServer,
     wsClient,
-    initializeWebSocket // Make sure this is pulled from context
+    // initializeWebSocket // Make sure this is pulled from context
   } = useContext(canvasContext);
 
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
@@ -26,14 +26,14 @@ export const useCanvas = (mainCanvasRef, tempCanvasRef) => {
   // Add this ref at the top of useCanvas
   const lastUpdateRef = useRef(0);
   const userIdRef = useRef(JSON.parse(localStorage.getItem("userInfo")).id);
-  console.log('useCanvas userIdRef:', userIdRef.current);
+  // console.log('useCanvas userIdRef:', userIdRef.current);
 
   
   // FIX: Initialize WebSocket on mount
-  useEffect(() => {
-    const canvasId = localStorage.getItem("currentCanvasId"); // Or get from URL params
-    initializeWebSocket(canvasId, userIdRef.current);
-  }, [initializeWebSocket]);
+  // useEffect(() => {
+  //   const canvasId = localStorage.getItem("currentCanvasId"); // Or get from URL params
+  //   initializeWebSocket(canvasId, userIdRef.current);
+  // }, [initializeWebSocket]);
   
   const screenToWorld = useCallback((screenX, screenY) => {
     return {
@@ -52,8 +52,14 @@ export const useCanvas = (mainCanvasRef, tempCanvasRef) => {
     ctx.save();
     ctx.translate(panOffset.x, panOffset.y);
     ctx.scale(zoomLevel, zoomLevel);
-    shapes.forEach((shape) => drawShape(ctx, shape));
-    
+
+    shapes.forEach((shape) => {
+      // Skip temporary shapes that might be malformed
+      if (shape.id && shape.id.startsWith('temp_') && !shape.startPos) {
+        return;
+      }
+      drawShape(ctx, shape);
+    });
    
     ctx.restore();
   }, [shapes, panOffset, zoomLevel, mainCanvasRef]);
@@ -76,8 +82,8 @@ export const useCanvas = (mainCanvasRef, tempCanvasRef) => {
   }, [mainCanvasRef, drawAllShapes]);
   
   useEffect(() => {
-    console.log('Redrawing all shapes due to shapes change');
-    console.log('Current shapes:', shapes);
+    // console.log('Redrawing all shapes due to shapes change');
+    // console.log('Current shapes:', shapes);
     drawAllShapes();
   }, [drawAllShapes, shapes]);
 
@@ -112,6 +118,9 @@ export const useCanvas = (mainCanvasRef, tempCanvasRef) => {
     liveShapeRef.current = newShape;
 
     if (selectedShape === "eraser") {
+      const tempCtx = tempCanvasRef.current?.getContext("2d");
+      newShape.points = [worldPos];
+      drawShape(tempCtx, newShape);
       // 1. Find the shape being clicked
       const shapeToDelete = shapes.find(s => isPointInShape(worldPos.x, worldPos.y, s, 20));
       
@@ -119,8 +128,9 @@ export const useCanvas = (mainCanvasRef, tempCanvasRef) => {
           // 2. Remove from local UI immediately
           console.log("Found shape to delete:", shapeToDelete);
           // 3. Tell the server to delete it from DB and other users
-          if (shapeToDelete.id && wsClient?.readyState === WebSocket.OPEN) {
-            setShapes(prev => prev.filter(s => s.id !== shapeToDelete.id));
+          if (shapeToDelete.id && wsClient.isConnected) {
+            // setShapes(prev => prev.filter(s => s.id !== shapeToDelete.id));
+            console.log("Requesting deletion of shape ID:", shapeToDelete.id);
             deleteShapeFromServer(shapeToDelete.id);
           } else {
             console.warn("Shape found but has no ID yet (still syncing with server)");
@@ -129,7 +139,7 @@ export const useCanvas = (mainCanvasRef, tempCanvasRef) => {
         console.log("No shape found at position:", worldPos);
       }
     }
-  }, [selectedShape, screenToWorld, isDrawing, isPanning, setShapes]);
+  }, [selectedShape, screenToWorld, isDrawing, isPanning, shapes, wsClient, deleteShapeFromServer]);
 
   const handleMouseMove = useCallback((e) => {
     const { offsetX, offsetY } = e.nativeEvent;
@@ -147,13 +157,19 @@ export const useCanvas = (mainCanvasRef, tempCanvasRef) => {
     if (!isDrawing.current || !liveShapeRef.current) return;
 
     if (isDrawing.current && selectedShape === "eraser") {
+      if (!liveShapeRef.current.points) {
+        liveShapeRef.current.points = [startPos];
+      }
+      liveShapeRef.current.points.push(worldPos);
         // Check for shapes under the cursor while moving
         const shapeToDelete = shapes.find(s => isPointInShape(worldPos.x, worldPos.y, s, 20));
         
         if (shapeToDelete && shapeToDelete.id && !deletedInSession.current.has(shapeToDelete.id)) {
-          deletedInSession.current.add(shapeToDelete.id);  
-          setShapes(prev => prev.filter(s => s.id !== shapeToDelete.id));
-            deleteShapeFromServer(shapeToDelete.id);
+          const targetId = shapeToDelete.id;  
+          // Add to Ref immediately (synchronous)
+          deletedInSession.current.add(targetId); 
+          // Trigger server and state
+          deleteShapeFromServer(targetId);
         }
     }
 
@@ -185,13 +201,12 @@ export const useCanvas = (mainCanvasRef, tempCanvasRef) => {
       }
       lastUpdateRef.current = now;
     }
-  }, [screenToWorld, panOffset, zoomLevel, tempCanvasRef, selectedShape, wsClient]);
+  }, [screenToWorld, panOffset, zoomLevel, tempCanvasRef, selectedShape, wsClient, shapes, deleteShapeFromServer, startPos, setPanOffset]);
 
   const handleMouseUp = useCallback(() => {
     isDrawing.current = false;
     isPanning.current = false;
     
-    isDrawing.current = false;
     deletedInSession.current.clear();
     const tempCtx = tempCanvasRef.current?.getContext("2d");
     tempCtx?.clearRect(0, 0, tempCtx.canvas.width, tempCtx.canvas.height);
@@ -202,5 +217,5 @@ export const useCanvas = (mainCanvasRef, tempCanvasRef) => {
     liveShapeRef.current = null;
   }, [addShapeToServer, selectedShape, tempCanvasRef]);
 
-  return { handleMouseDown, handleMouseMove, handleMouseUp };
+  return { handleMouseDown, handleMouseMove, handleMouseUp, drawAllShapes };
 };

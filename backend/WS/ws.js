@@ -2,6 +2,7 @@ import { WebSocketServer } from "ws";
 import dotenv from "dotenv";
 import prisma from '../config/db.js';
 import path from "path";
+
 // Global first
 dotenv.config({
   path: path.resolve(process.cwd(), "../config/.env")
@@ -17,17 +18,81 @@ const server = new WebSocketServer({port: process.env.PORT , maxPayload: 1024 * 
 
 const canvasClient = new Map();
 
+// ====== DATABASE RETRY LOGIC ======
+async function retryDatabaseOperation(operation, maxRetries = 3, initialDelay = 1000) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            return await operation();
+        } catch (error) {
+            // Check if it's a connection error
+            if (error.code === 'P1001' || error.code === 'P1017') {
+                console.log(`Database connection failed (attempt ${attempt}/${maxRetries})`);
+                
+                if (attempt === maxRetries) {
+                    throw error; // Give up after max retries
+                }
+                
+                // Exponential backoff: wait longer each time
+                const delay = initialDelay * Math.pow(2, attempt - 1);
+                console.log(`Retrying in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                
+                // Try to reconnect Prisma
+                try {
+                    await prisma.$connect();
+                } catch (reconnectError) {
+                    console.log('Prisma reconnect attempt failed, will retry operation');
+                }
+            } else {
+                // If it's not a connection error, throw immediately
+                throw error;
+            }
+        }
+    }
+}
+
+// Wrapper functions for database operations
+async function createShape(data) {
+    return retryDatabaseOperation(() => prisma.shape.create({ data }));
+}
+
+async function findManyShapes(where) {
+    return retryDatabaseOperation(() => prisma.shape.findMany({ where }));
+}
+
+async function createCollaboration(data) {
+    return retryDatabaseOperation(() => prisma.collaboration.create({ data }));
+}
+
+async function createHistory(data) {
+    return retryDatabaseOperation(() => prisma.history.create({ data }));
+}
+
+async function deleteShape(where) {
+    return retryDatabaseOperation(() => prisma.shape.delete({ where }));
+}
+
+async function updateShape(where, data) {
+    return retryDatabaseOperation(() => prisma.shape.update({ where, data }));
+}
+
+async function deleteCollaborations(where) {
+    return retryDatabaseOperation(() => prisma.collaboration.deleteMany({ where }));
+}
+
+// ====== BROADCAST FUNCTION ======
 function broadCast(message, canvasId, sender){
     const set = canvasClient.get(canvasId);
     if(!set || set.size === 0) return;
     
     for(const client of set){
-        if(client !== sender && client.readyState === client.OPEN){
+        if(client.readyState === client.OPEN){
             client.send(message);
         }
     }
 }
 
+// ====== WEBSOCKET SERVER ======
 server.on('connection', (ws, req) => {
     ws.on('error', console.error);
 
@@ -44,7 +109,7 @@ server.on('connection', (ws, req) => {
 
             if(type === 'joinCanvas'){
                 userId = data.userId;
-                // in this i use canvasId in general have one extra table which have canvasId(one) and userId(many) and generated string which use for joining time
+                
                 if(!canvasClient.has(canvasId)) {
                     canvasClient.set(canvasId, new Set());
                 }
@@ -55,27 +120,25 @@ server.on('connection', (ws, req) => {
                 console.log(`Client joined canvas ${canvasId}`);
                 
                 try{
-                    const shapes = await prisma.shape.findMany({
-                        where: {canvasId},
+                    const shapes = await findManyShapes({canvasId});
+                    console.log('Fetched initial shapes for:', userId, canvasId);
+                    
+                    const collaborators = await createCollaboration({
+                        canvasId,
+                        userId,
+                        role: role.toUpperCase()
                     });
-                    console.log('Fetched initial id:', userId, canvasId);
-                    const collborators = await prisma.collaboration.create({
-                        data: {
-                            canvasId,
-                            userId,
-                            role:  role.toUpperCase()
-                        }
-                    })
+                    
                     ws.send(JSON.stringify({
                         type: 'initialShapes',
                         data: shapes,
-                        collaborators_space: collborators
+                        collaborators_space: collaborators
                     }));
                 } catch (err) {
                     console.error('Error fetching shapes:', err);
                     ws.send(JSON.stringify({
                         type: 'error',
-                        message: 'Failed to fetch initial shapes'
+                        message: 'Failed to fetch initial shapes. Database may be starting up.'
                     }));
                 }
             }
@@ -91,7 +154,7 @@ server.on('connection', (ws, req) => {
             }
 
             if(type === 'drawShape'){
-                const { shape } = data;
+                const { shape, tempId } = data;
                 const shapeType = typeof shape.type === "string" ? shape.type.toUpperCase() : null;
 
                 const allowedTypes = ["RECTANGLE", "CIRCLE", "LINE", "ARROW", "DIAMOND", "TEXT", "PENCIL", "ERASER"];
@@ -108,7 +171,7 @@ server.on('connection', (ws, req) => {
                         type: 'error',
                         message: 'You do not have permission to draw shapes'
                     }));
-                    return ;
+                    return;
                 }
 
                 const clients = canvasClient.get(canvasId) || [];
@@ -117,113 +180,112 @@ server.on('connection', (ws, req) => {
                     console.error(`Client not part of canvas ${canvasId}`);
                     return;
                 }
+                
                 try{
                     console.log('Draw shape request:', shape);
-                    const shapeData = await prisma.shape.create({
-                        data: {
-                            canvas:{
-                                connect: {id: canvasId}
-                            },
-                            type: shapeType,
-                            x: shape.startPos.x, 
-                            y: shape.startPos.y,
-                            width: Math.abs(shape.endPos.x - shape.startPos.x) || 0,
-                            height: Math.abs(shape.endPos.y - shape.startPos.y) || 0,
-                            radius: shape.radius || null,
-                            points: shape.points || null,
-                            rotation: shape.rotation || 0,
-                            lineType: shape.lineType || 'SOLID',
-                            color: shape.color || '#ffffff',
-                            fillColor: shape.fillColor || null
-                        }
+                    
+                    const shapeData = await createShape({
+                        canvas:{
+                            connect: {id: canvasId}
+                        },
+                        type: shapeType,
+                        x: shape.startPos.x, 
+                        y: shape.startPos.y,
+                        width: Math.abs(shape.endPos.x - shape.startPos.x) || 0,
+                        height: Math.abs(shape.endPos.y - shape.startPos.y) || 0,
+                        radius: shape.radius || null,
+                        points: shape.points || null,
+                        rotation: shape.rotation || 0,
+                        lineType: shape.lineType || 'SOLID',
+                        color: shape.color || '#ffffff',
+                        fillColor: shape.fillColor || null
                     });
+                    
                     console.log('Shape saved:', shapeData);
-                    await prisma.history.create({
-                        data: {
-                            canvasId,
-                            action: "add_shape",
-                            data: shapeData
-                        }
-                    });
-                    // console.log('Broadcasting new shape to other clients');
+                    
+                    // Save to history (non-blocking, don't wait)
+                    createHistory({
+                        canvasId,
+                        action: "add_shape",
+                        data: shapeData
+                    }).catch(err => console.error('Failed to save history:', err));
+                    
                     broadCast(JSON.stringify({
                         type: 'newShape', 
-                        data: shapeData
+                        data: {
+                            shapeData,
+                            tempId: tempId
+                        }
                     }), canvasId, ws);
-                }catch(err) {
+                    
+                } catch(err) {
                     console.error('Error saving shape:', err);
+                    
+                    const errorMessage = err.code === 'P1001' 
+                        ? 'Database connection lost. Your drawing is shown but not saved. Please try again.'
+                        : 'Failed to save shape';
+                    
                     ws.send(JSON.stringify({
                         type: 'error',
-                        message: 'Failed to save shape'
+                        message: errorMessage
                     }));
-                    return ;
+                    return;
                 }
             }
 
             if(type === 'deleteShape'){
                 console.log('Delete shape request:', data);
                 const { id } = data;
+                
                 if(!id) {
                     console.error('Shape ID is required for deletion');
                     ws.send(JSON.stringify({
                         type: "error",
                         message: "Shape ID is required for deletion"
                     }));
-                    return ;
+                    return;
                 }
 
                 try{
-                    const deletedShape = await prisma.shape.delete({
-                        where: {
-                            id: id
-                        }
-                    });
+                    const deletedShape = await deleteShape({id});
+                    console.log('Successfully deleted shape:', deletedShape);
 
-                    if(!deletedShape.count){
-                        ws.send(JSON.stringify({
-                            type: 'error',
-                            message: 'Shape not found or already deleted'
-                        }));
-                        return;
-                    }
-
-                    await prisma.history.create({
-                        data: {
-                            canvas: {
-                                connect: {id: ws.canvasId}
-                            },
-                            action: "delete_shape",
-                            data: deletedShape
-                        }
-                    });
+                    // Save to history (non-blocking)
+                    createHistory({
+                        canvasId: ws.canvasId,
+                        action: "delete_shape",
+                        data: deletedShape
+                    }).catch(err => console.error('Failed to save history:', err));
 
                     broadCast(JSON.stringify({type: 'deleteShape', data: {id}}), canvasId, ws);
-                }catch (err){
+                    
+                } catch (err){
                     console.error("error deleting shape: ", err);
+                    
                     if(err.code === "P2025"){
                         console.log(`Shape ${id} already deleted. Ignoring.`);
                         ws.send(JSON.stringify({
                             type: "error",
                             message: "Shape not found or already deleted"
                         }));
-                    }else{
+                    } else {
                         console.error("Error deleting shape:", err);
                         ws.send(JSON.stringify({
                             type: "error",
-                            message: "failed to deleted shape"
+                            message: "Failed to delete shape"
                         }));
                     }
                 }
             }
 
-
             if(type === 'moveShape'){
                 const shapeId = data.shape.id;
                 const shape = data.shape;
+                
                 try{
-                    const updatedShape = await prisma.Shape.update({
-                        where: {id: shapeId},
-                        data: {
+                    const updatedShape = await updateShape(
+                        {id: shapeId},
+                        {
                             canvas: {
                                 connect: {id: data.canvasId}
                             },
@@ -238,20 +300,18 @@ server.on('connection', (ws, req) => {
                             color: shape.color || '#ffffff',
                             fillColor: shape.fillColor || null
                         }
-                    });
+                    );
 
-                    await prisma.History.create({
-                        data: {
-                            canvas: {
-                                connect: {id: data.canvasId}
-                            },
-                            action: "move_shape",
-                            data: updatedShape
-                        }
-                    });
+                    // Save to history (non-blocking)
+                    createHistory({
+                        canvasId: data.canvasId,
+                        action: "move_shape",
+                        data: updatedShape
+                    }).catch(err => console.error('Failed to save history:', err));
 
                     broadCast(JSON.stringify({type: 'shapeMoved', data: updatedShape}), canvasId, ws);
-                }catch(err) {
+                    
+                } catch(err) {
                     console.error('Error moving shape:', err);
                     ws.send(JSON.stringify({
                         type: 'error',
@@ -259,7 +319,7 @@ server.on('connection', (ws, req) => {
                     }));
                 }
             }
-        }catch(err) {
+        } catch(err) {
             console.error('Error processing message:', err);
         }
     });
@@ -273,21 +333,31 @@ server.on('connection', (ws, req) => {
                 console.log(`All clients disconnected from canvas ${ws.canvasId}`);
             }
 
-            await prisma.Collaboration.deleteMany({
-                where: {
+            try {
+                await deleteCollaborations({
                     canvasId: ws.canvasId,
                     userId: userId
-                }
-            })
+                });
+            } catch (err) {
+                console.error('Error removing collaboration:', err);
+            }
 
             broadCast(JSON.stringify({
                 type: 'userDisconnected',
                 data: {userId, canvasId: ws.canvasId}
-            }), ws.canvasId,ws);
+            }), ws.canvasId, ws);
         }
     });
 });
 
 server.on("listening", () => {
-    console.log(` WebSocket server running on ws://localhost:${process.env.PORT}`);
-})
+    console.log(`WebSocket server running on ws://localhost:${process.env.PORT}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+    console.log('SIGTERM received, closing server...');
+    server.close();
+    await prisma.$disconnect();
+    process.exit(0);
+});

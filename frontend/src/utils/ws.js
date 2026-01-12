@@ -138,12 +138,13 @@ class WebSocketClient {
   }
 
   // Draw shape (finalize and save to DB)
-  drawShape(shape) {
+  drawShape(shape, tempId) {
     this.send({
       type: 'drawShape',
       data: {
         shape,
-        canvasId: this.canvasId
+        canvasId: this.canvasId,
+        tempId: tempId
       }
     });
   }

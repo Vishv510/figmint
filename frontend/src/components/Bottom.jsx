@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { canvasContext } from "../context/canvasContext";
+import { canvasContext } from "../context/CanvasContext";
 
 export function BottomToolbar() {
   const { undo, redo, handleZoomIn, handleZoomOut } = useContext(canvasContext);
