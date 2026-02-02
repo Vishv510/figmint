@@ -4,29 +4,41 @@ export function drawShape(ctx, shape) {
   if (!ctx || !shape) return;
 
   const { type, x, y, width, height, radius, points, text } = shape;
-
+  ctx.save()
+  ctx.globalAlpha = shape.opacity ?? 1;
+  
   ctx.beginPath();
   ctx.lineWidth = shape.strokeWidth || 2;
   ctx.strokeStyle = shape.color || "#000";
-  ctx.fillStyle = shape.fill || "transparent";
 
   const shapeType = type.toLowerCase();
   switch (shapeType) {
     case "rectangle":
       ctx.rect(x, y, width, height);
-      ctx.fill();
+      
+      if (shape.fill && shape.fill !== "transparent") {
+        ctx.fillStyle = shape.fill;
+        ctx.fill();
+      }
       ctx.stroke();
       break;
 
     case "circle":
       ctx.arc(x, y, radius, 0, 2 * Math.PI);
-      ctx.fill();
+      
+      if (shape.fill && shape.fill !== "transparent") {
+        ctx.fillStyle = shape.fill;
+        ctx.fill();
+      }
       ctx.stroke();
       break;
 
     case "line":
       ctx.moveTo(x, y);
       ctx.lineTo(x + width, y + height);
+      if (shape.fill && shape.fill !== "transparent") {
+        ctx.fill();
+      }
       ctx.stroke();
       break;
 
@@ -49,6 +61,9 @@ export function drawShape(ctx, shape) {
         x + width - headLength * Math.cos(angle + Math.PI / 6),
         y + height - headLength * Math.sin(angle + Math.PI / 6)
       );
+      if (shape.fill && shape.fill !== "transparent") {
+        ctx.fill();
+      }
       ctx.stroke();
       break;
     }
@@ -59,7 +74,11 @@ export function drawShape(ctx, shape) {
       ctx.lineTo(x, y + height / 2);
       ctx.lineTo(x - width / 2, y);
       ctx.closePath();
-      ctx.fill();
+      
+      if (shape.fill && shape.fill !== "transparent") {
+        ctx.fillStyle = shape.fill;
+        ctx.fill();
+      }
       ctx.stroke();
       break;
 
@@ -69,6 +88,9 @@ export function drawShape(ctx, shape) {
         for (let i = 1; i < points.length; i++) {
           ctx.lineTo(points[i].x, points[i].y);
         }
+        if (shape.fill && shape.fill !== "transparent") {
+          ctx.fill();
+        }
         ctx.stroke();
       }
       break;
@@ -77,6 +99,9 @@ export function drawShape(ctx, shape) {
       ctx.font = `${shape.fontSize || 16}px Arial`;
       ctx.fillStyle = shape.color || "black";
       ctx.fillText(text || "", x, y);
+      if (shape.fill && shape.fill !== "transparent") {
+        ctx.fill();
+      }
       break;
 
     case "eraser": 
@@ -90,7 +115,9 @@ export function drawShape(ctx, shape) {
         for(let i=1; i< points.length; i++){
           ctx.lineTo(points[i].x, points[i].y);
         }
-
+        if (shape.fill && shape.fill !== "transparent") {
+          ctx.fill();
+        }
         ctx.stroke();
       }
       break;
@@ -100,4 +127,5 @@ export function drawShape(ctx, shape) {
   }
 
   ctx.closePath();
+  ctx.restore();
 }

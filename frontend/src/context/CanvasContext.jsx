@@ -13,6 +13,7 @@ export function CanvasProvider({ children}) {
   const [fill, setFill] = useState("transparent");// fill color
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [fontSize, setFontSize] = useState(16);
+  const [opacity, setOpacity] = useState(1);
 
  // --- helpers to add shapes ---
 
@@ -82,7 +83,7 @@ export function CanvasProvider({ children}) {
         fontSize, setFontSize,
         addRectangle, addCircle, addLine,
         addArrow, addDiamond, addFreehand, addText,
-      
+        opacity, setOpacity,
       }}
     >
       {children}

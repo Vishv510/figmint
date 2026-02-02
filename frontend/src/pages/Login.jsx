@@ -17,7 +17,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const data = await login(email, password);  // 🔥 call backend login
+      const data = await login(email, password);  // call backend login
       console.log("Logged in: ", data);           // redirect after login
       
       // const canvasId = localStorage.getItem("canvasId");

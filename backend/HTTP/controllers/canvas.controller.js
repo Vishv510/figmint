@@ -3,6 +3,18 @@ import prisma from '../../config/db.js';
 export const createCanvas = async (req, res) => {
     try{
         console.log("You are reach in createCanvas endpoint");
+        const canvasOld = await prisma.Canvas.findUnique({
+            where: {
+                ownerId: req.user._id,
+            }
+        });
+
+        if(canvasOld){
+            res.status(200).json({
+                canvasId: canvas.id,
+                message: "Welcome home"
+            })
+        }
         const canvas = await prisma.Canvas.create({
             data: {
                 name: req.body.name || "My Canvas",

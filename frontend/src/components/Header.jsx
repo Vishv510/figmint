@@ -4,11 +4,13 @@ import { useAuth } from "../hooks/useAuth.js";
 import { SharePopUp } from "./UI/sharePopUp.jsx";
 import { useState } from "react";
 import { UpperToolbar } from "./UpperToolbar.jsx";
+import { SettingsMenu } from "./settingMenu.jsx";
 
 export function Header() {
     const { canvasId, setCanvasId } = useCanvas();
     const { user } = useAuth();
-    const [open, setOpen] = useState();
+    const [openShare, setOpenShare] = useState(false);
+    const [ openMenu, setOpenMenu] = useState(false);
 
     async function shareCanvas(){
         if(!canvasId){
@@ -32,16 +34,23 @@ export function Header() {
             }
         }
 
-        setOpen(true);
+        setOpenShare(true);
     }
 
     return <>
         <div className="flex justify-between mt-3">
-            <div >
-                <button className="ml-6 p-2 rounded bg-gray-200 dark:bg-gray-400 hover:shadow">
+            <div className="relative ml-6">
+                <button onClick={() => setOpenMenu((prev) => !prev)} className="ml-6 p-2 rounded bg-gray-200 dark:bg-gray-400 hover:shadow">
                     <AlignJustify  className="w-5 h-5 dark:color:white" />
                 </button>
+
+                {openMenu && (
+                    <div className="absolute top-full mt-2 left-0 z-50">
+                        <SettingsMenu />
+                    </div>
+                )}
             </div>
+
             <UpperToolbar />
             <div>
                 <button className="bg-indigo-400 rounded h-10 w-16 mr-6" onClick={shareCanvas}>
@@ -50,11 +59,12 @@ export function Header() {
             </div>
         </div>
 
-        {open && (
-            <SharePopUp isOpen={open} onClose={() => setOpen(false)}>
+        {openShare && (
+            <SharePopUp isOpen={openShare} onClose={() => setOpenShare(false)}>
                 <p>This is your room Id, copy and share it </p>
                 <p className="font-bold">{`${canvasId}`}</p>
             </SharePopUp>
         )}
+
     </>
 }

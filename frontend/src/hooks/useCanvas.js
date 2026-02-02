@@ -6,7 +6,7 @@ const canvasId = localStorage.getItem("canvasId");
 const userId = localStorage.getItem('userId');
 
 export default function useCanvasDrawing(canvasRef) {
-  const { shapes, addShape, setShapes, tool, color, strokeWidth } = useCanvas();
+  const { shapes, addShape, setShapes, tool, color, strokeWidth, opacity, fill } = useCanvas();
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [isErasing, setIsErasing] = useState(false);
@@ -406,7 +406,7 @@ export default function useCanvasDrawing(canvasRef) {
         const y = Math.min(startY, offsetY);
         const width = Math.abs(offsetX - startX);
         const height = Math.abs(offsetY - startY);
-        finalShape = { type: "rectangle", x, y, width, height, color, strokeWidth };
+        finalShape = { type: "rectangle", x, y, width, height, color, strokeWidth, opacity, fill };
         addShape(finalShape);
         break;
       }
@@ -415,7 +415,7 @@ export default function useCanvasDrawing(canvasRef) {
         const radius = Math.sqrt(
           Math.pow(offsetX - startX, 2) + Math.pow(offsetY - startY, 2)
         );
-        finalShape = { type: "circle", x: startX, y: startY, radius, color, strokeWidth };
+        finalShape = { type: "circle", x: startX, y: startY, radius, color, strokeWidth, fill, opacity};
         addShape(finalShape);
         break;
       }
@@ -441,7 +441,7 @@ export default function useCanvasDrawing(canvasRef) {
         const height = offsetY - startY;
         const x = startX + width / 2;
         const y = startY + height / 2;
-        finalShape = { type: "diamond", x, y, width, height, color, strokeWidth };
+        finalShape = { type: "diamond", x, y, width, height, color, strokeWidth, fill, opacity };
         addShape(finalShape);
         break;
       }
@@ -461,6 +461,7 @@ export default function useCanvasDrawing(canvasRef) {
           text: "Your Text",
           color,
           fontSize: 16,
+          fill
         };
         addShape(finalShape);
         break;
