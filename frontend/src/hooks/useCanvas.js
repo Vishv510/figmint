@@ -80,7 +80,7 @@ export default function useCanvasDrawing(canvasRef) {
             break;
             
           default:
-            console.log("Unknow message type:", message.type);
+            console.log("Unknow message type:", message);
           }
         };
 
