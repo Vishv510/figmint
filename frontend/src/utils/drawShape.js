@@ -10,6 +10,8 @@ export function drawShape(ctx, shape) {
   ctx.beginPath();
   ctx.lineWidth = shape.strokeWidth || 2;
   ctx.strokeStyle = shape.color || "#000";
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
 
   const shapeType = type.toLowerCase();
   switch (shapeType) {
@@ -84,10 +86,16 @@ export function drawShape(ctx, shape) {
 
     case "freehand":
       if (points && points.length > 1) {
+        // Curve through the midpoints, the same way the live preview is drawn in useCanvas.js,
+        // so a stroke does not change shape when the pointer is released.
         ctx.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < points.length; i++) {
-          ctx.lineTo(points[i].x, points[i].y);
+        for (let i = 1; i < points.length - 1; i++) {
+          const midX = (points[i].x + points[i + 1].x) / 2;
+          const midY = (points[i].y + points[i + 1].y) / 2;
+          ctx.quadraticCurveTo(points[i].x, points[i].y, midX, midY);
         }
+        const last = points[points.length - 1];
+        ctx.lineTo(last.x, last.y);
         if (shape.fill && shape.fill !== "transparent") {
           ctx.fill();
         }

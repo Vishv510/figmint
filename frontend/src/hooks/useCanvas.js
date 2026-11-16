@@ -5,14 +5,26 @@ import { useCanvas } from "../context/CanvasContext.jsx";
 const canvasId = localStorage.getItem("canvasId");
 const userId = localStorage.getItem('userId');
 
+const ERASER_RADIUS = 14;   // screen pixels; matches the .cursor-eraser ring in App.css
+const MIN_DRAG = 3;         // screen pixels; a shorter drag is a stray click, not a shape
+const FILLABLE = ["rectangle", "circle", "diamond"];
+const LOCAL_ID_PREFIX = "local-"; // id of a shape drawn here that the server has not confirmed
+
+// A mouse always reports the same pressure, so only a pen's value is meaningful.
+const penPressure = (e) => (e.pointerType === "pen" && e.pressure > 0 ? e.pressure : 1);
+
 export default function useCanvasDrawing(canvasRef) {
-  const { shapes, addShape, setShapes, tool, color, strokeWidth, opacity, fill } = useCanvas();
+  const {
+    shapes, addShape, setShapes,
+    tool, color, strokeWidth, opacity, fill,
+    view, setView, zoomTo,
+  } = useCanvas();
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [isErasing, setIsErasing] = useState(false);
+  const [isPanning, setIsPanning] = useState(false);
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
-  const [freehandPoints, setFreehandPoints] = useState([]);
   const [eraserPath, setEraserPath] = useState([]);
 
 
@@ -21,29 +33,34 @@ export default function useCanvasDrawing(canvasRef) {
 
   const [smoothPoints, setSmoothPoints] = useState([]);
   const [lastPoint, setLastPoint] = useState(null);
-  const [pressure, setPressure] = useState(1);
 
+  // Size of the canvas element in CSS pixels, and how many device pixels make one CSS pixel.
+  const [viewport, setViewport] = useState({ width: 0, height: 0, dpr: 1 });
+  // "connecting" | "online" | "offline"
+  const [connection, setConnection] = useState("connecting");
 
   // New state for undo/redo history
   // const [history, setHistory] = useState([]);
   // const [historyIndex, setHistoryIndex] = useState(-1);
-  
+
   const wsRef = useRef(null);
+  const panStart = useRef(null);   // last pointer position while dragging with the hand tool
   const lastEraseTime = useRef(0);
   const ERASE_DEBOUNCE_MS = 5;
   const deletedShapeIds = useRef(new Set()); // Track already deleted shapes
   const animationFrameRef = useRef(null);
   const SMOOTHING_FACTOR = 0.85;
   const MIN_DISTANCE = 2;
-  
+
   //websocket setup
   useEffect(() => {
     if(!wsRef.current){
       const ws = new WebSocket('ws://localhost:8080');
       wsRef.current = ws;
-      
+
       ws.onopen = () => {
         console.log("WebSocket connencted");
+        setConnection("online");
         ws.send(JSON.stringify({
           type: "joinCanvas",
           data: {canvasId, userId, role: "owner"}
@@ -63,10 +80,10 @@ export default function useCanvasDrawing(canvasRef) {
             break;
           }
 
-          case "newShape": 
+          case "newShape":
             setShapes(prev => [...prev, message.data]);
             break;
-          
+
             case "liveShapeUpdate":
               setLiveShape(prev => {
               const newMap = new Map(prev);
@@ -75,17 +92,18 @@ export default function useCanvasDrawing(canvasRef) {
             })
             break;
 
-          case "deleteShape": 
+          case "deleteShape":
             setShapes(prev => prev.filter(s => s.id !== message.data.id));
             break;
-            
+
           default:
             console.log("Unknow message type:", message);
           }
         };
 
-        ws.onclose = () =>{ 
+        ws.onclose = () =>{
           console.log("Websocket disconnected");
+          setConnection("offline");
         };
     }
 
@@ -112,31 +130,13 @@ export default function useCanvasDrawing(canvasRef) {
     return Math.sqrt(dx * dx + dy * dy);
   }, []);
 
-  const redrawCanvas = useCallback((ctx) => {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    
-    // Draw shapes
-    shapes.forEach((shape) => {
-      drawShape(ctx, shape);
-    });
-    
-    if(myTempShape) {
-      // drawShape(ctx, myTempShape);
-      if (myTempShape.type === 'freehand' && smoothPoints.length > 0) {
-        drawSmoothFreehand(ctx, smoothPoints, myTempShape.color, myTempShape.strokeWidth);
-      } else {
-        drawShape(ctx, myTempShape);
-      }
-    }
-    
-    liveShapes.forEach((shape) => drawShape(ctx, shape));
-    
-    // Draw eraser path (visual feedback)
-    if (tool === "eraser" && eraserPath.length > 0 ) {
-      drawEraserPath(ctx, eraserPath);
-    }
-  },[shapes, myTempShape, liveShapes, tool, eraserPath, smoothPoints]);
-  
+  // Shapes are stored in canvas ("world") coordinates, so they stay where they are
+  // when the view pans or zooms. Pointer events arrive in screen coordinates.
+  const toWorld = useCallback((screenX, screenY) => ({
+    x: (screenX - view.x) / view.zoom,
+    y: (screenY - view.y) / view.zoom,
+  }), [view]);
+
   const drawSmoothFreehand = useCallback((ctx, points, color, strokeWidth) => {
     if( points.length < 2) return ;
 
@@ -145,7 +145,7 @@ export default function useCanvasDrawing(canvasRef) {
     ctx.lineWidth = strokeWidth;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-     ctx.beginPath();
+    ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
 
     // Use quadratic curves for smooth drawing
@@ -153,12 +153,12 @@ export default function useCanvasDrawing(canvasRef) {
       const currentPoint = points[i];
       const nextPoint = points[i + 1];
       const controlPoint = interpolatePoints(currentPoint, nextPoint, 0.5);
-      
+
       // Vary line width based on pressure if available
       if (currentPoint.pressure) {
         ctx.lineWidth = strokeWidth * currentPoint.pressure;
       }
-      
+
       ctx.quadraticCurveTo(currentPoint.x, currentPoint.y, controlPoint.x, controlPoint.y);
     }
 
@@ -172,18 +172,18 @@ export default function useCanvasDrawing(canvasRef) {
     ctx.restore();
   }, [interpolatePoints]);
 
+  // Faint trail behind the eraser while it is being dragged.
   const drawEraserPath = useCallback((ctx, path) => {
     if(!isDrawing)  return;
-    if (path.length === 0) return;
+    if (path.length < 2) return;
 
     ctx.save();
-    
-    // Draw eraser trail
-    ctx.strokeStyle = 'rgba(255, 0, 0, 0.3)';
-    ctx.lineWidth = 4;
+    ctx.strokeStyle = 'rgba(113, 113, 122, 0.25)';
+    ctx.lineWidth = (ERASER_RADIUS * 2) / view.zoom;
     ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.beginPath();
-    
+
     path.forEach((point, index) => {
       if (index === 0) {
         ctx.moveTo(point.x, point.y);
@@ -192,33 +192,96 @@ export default function useCanvasDrawing(canvasRef) {
       }
     });
     ctx.stroke();
-
-    // Draw eraser cursor
-    if (path.length > 0) {
-      const lastPoint = path[path.length - 1];
-      ctx.beginPath();
-      ctx.arc(lastPoint.x, lastPoint.y, 12, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
-    
     ctx.restore();
-  }, [isDrawing]);
+  }, [isDrawing, view.zoom]);
+
+  const redrawCanvas = useCallback((ctx) => {
+    const { dpr } = viewport;
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    // From here on everything is drawn in world coordinates.
+    ctx.setTransform(dpr * view.zoom, 0, 0, dpr * view.zoom, dpr * view.x, dpr * view.y);
+
+    // Draw shapes
+    shapes.forEach((shape) => {
+      drawShape(ctx, shape);
+    });
+
+    if(myTempShape) {
+      if (myTempShape.type === 'freehand' && smoothPoints.length > 0) {
+        drawSmoothFreehand(ctx, smoothPoints, myTempShape.color, myTempShape.strokeWidth);
+      } else {
+        drawShape(ctx, myTempShape);
+      }
+    }
+
+    liveShapes.forEach((shape) => drawShape(ctx, shape));
+
+    // Draw eraser path (visual feedback)
+    if (tool === "eraser" && eraserPath.length > 0 ) {
+      drawEraserPath(ctx, eraserPath);
+    }
+  }, [shapes, myTempShape, liveShapes, tool, eraserPath, smoothPoints, view, viewport, drawSmoothFreehand, drawEraserPath]);
+
+  // Keep track of the canvas element's size (it fills the window).
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const measure = () => setViewport({
+      width: canvas.clientWidth,
+      height: canvas.clientHeight,
+      dpr: window.devicePixelRatio || 1,
+    });
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, [canvasRef]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    // Match the drawing buffer to the real pixel size so lines stay sharp on any screen.
+    const width = Math.round(viewport.width * viewport.dpr);
+    const height = Math.round(viewport.height * viewport.dpr);
+    if (!width || !height) return;
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+
     const ctx = canvas.getContext("2d");
     // Set canvas properties for better rendering
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     redrawCanvas(ctx);
-    
-  }, [canvasRef, redrawCanvas, shapes, tool, isErasing, eraserPath]);
-  
+  }, [canvasRef, redrawCanvas, viewport]);
+
+  // Wheel scrolls the canvas; Ctrl/Cmd + wheel (or a trackpad pinch) zooms around the pointer.
+  // Registered by hand because React's onWheel is passive and cannot stop the page from zooming.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const onWheel = (e) => {
+      e.preventDefault();
+      const unit = e.deltaMode === 1 ? 16 : 1; // Firefox reports lines, not pixels
+      if (e.ctrlKey || e.metaKey) {
+        const factor = Math.exp(-e.deltaY * unit * 0.0015);
+        zoomTo((zoom) => zoom * factor, e.offsetX, e.offsetY);
+      } else {
+        setView((v) => ({ ...v, x: v.x - e.deltaX * unit, y: v.y - e.deltaY * unit }));
+      }
+    };
+
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    return () => canvas.removeEventListener("wheel", onWheel);
+  }, [canvasRef, zoomTo, setView]);
+
   const eraseAtPosition = useCallback((x, y) => {
     // if(!isErasing) return ;
     console.log('Eraser at position:', x, y);
@@ -231,24 +294,29 @@ export default function useCanvasDrawing(canvasRef) {
     const validShapes = [...shapes, ...Array.from(liveShapes.values())];
     const shapesToDelete = validShapes.filter(shape => {
       if(deletedShapeIds.current.has(shape.id)) return false;
-      return isPointInsideShape(x, y, shape, 15);
-    });  
-    
-    if (shapesToDelete.length > 0) { // Ensure shape has an ID    
+      return isPointInsideShape(x, y, shape, ERASER_RADIUS / view.zoom);
+    });
+
+    if (shapesToDelete.length > 0) { // Ensure shape has an ID
       shapesToDelete.forEach(shape => {
         deletedShapeIds.current.add(shape.id);
       });
 
       const shapeIdsToDelete = shapesToDelete.map(shape => shape.id);
       setShapes(prev => prev.filter(s => !shapeIdsToDelete.includes(s.id)));
-      
+
       shapesToDelete.forEach(shapeToDelete => {
+        // A shape drawn in this session only has a local id, which the server does not know,
+        // so there is nothing to ask it to delete. It will come back on reload until the
+        // server reports saved ids to the sender.
+        if (String(shapeToDelete.id).startsWith(LOCAL_ID_PREFIX)) return;
+
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
           wsRef.current.send(JSON.stringify({
             type: "deleteShape",
-            data: { 
+            data: {
               id: shapeToDelete.id, // Make sure this is the database ID
-              canvasId: canvasId 
+              canvasId: canvasId
             }
           }));
         }
@@ -259,40 +327,50 @@ export default function useCanvasDrawing(canvasRef) {
       // shapesToDelete.forEach(shapeToDelete => {
       //   wsRef.current.send(JSON.stringify({
       //     type: "undo",
-      //     data: { 
+      //     data: {
       //       id: shapeToDelete.id, // Make sure this is the database ID
-      //       canvasId: canvasId 
+      //       canvasId: canvasId
       //     }
       //   }))
       // });
       // setHistory(newHistory);
-      // setHistoryIndex(newHistory.length - 1); 
+      // setHistoryIndex(newHistory.length - 1);
     }else {
       console.log('No shape found at position or shape missing ID');
     }
-  }, [ shapes]);
+  }, [shapes, liveShapes, setShapes, view.zoom]);
 
-  const handleMouseDown = useCallback((e) => {
-    const { offsetX, offsetY } = e.nativeEvent;
-    const currentPressure = e.nativeEvent.pressure || 1;
-    
+  const handlePointerDown = useCallback((e) => {
+    if (e.button !== 0) return;
+    // Keep receiving move/up events even when the pointer leaves the canvas or
+    // passes over a toolbar, so a stroke can never get stuck half-finished.
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+
+    if (tool === "hand") {
+      panStart.current = { x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY };
+      setIsPanning(true);
+      return;
+    }
+    if (tool === "select") return;
+
+    const { x, y } = toWorld(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+    const currentPressure = penPressure(e);
+
     setIsDrawing(true);
-    setStartX(offsetX);
-    setStartY(offsetY);
-    setPressure(currentPressure);
+    setStartX(x);
+    setStartY(y);
 
     deletedShapeIds.current.clear();
 
     if(tool === "eraser"){
-      console.log('Eraser clicked at:', offsetX, offsetY);
       setIsErasing(true);
-      eraseAtPosition(offsetX, offsetY);
-      setEraserPath([{x: offsetX, y: offsetY}]);
+      eraseAtPosition(x, y);
+      setEraserPath([{ x, y }]);
       return ;
     }
 
-    const initialPoint = {x: offsetX, y: offsetY, pressure: currentPressure};
-    
+    const initialPoint = { x, y, pressure: currentPressure };
+
     if (tool === "freehand") {
       setSmoothPoints([initialPoint]);
       setLastPoint(initialPoint);
@@ -300,68 +378,88 @@ export default function useCanvasDrawing(canvasRef) {
 
     const tempShape = {
       type: tool,
-      x: offsetX,
-      y: offsetY,
+      x,
+      y,
       color,
       strokeWidth,
 
       width: 0,
       height: 0,
-      redius: 0,
-      point: tool === "freehand" ? [{x : offsetX, y: offsetY}] : []
+      radius: 0,
+      points: tool === "freehand" ? [{ x, y }] : [],
+      // Preview with the same fill and opacity the finished shape will have.
+      ...(FILLABLE.includes(tool) ? { fill, opacity } : {}),
     };
 
     setMyTempShape(tempShape);
 
-    if(tool !== "eraser" && wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+    if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
         type: "drawLiveShape",
         data: { canvasId, shape: tempShape }
       }));
     }
 
-  }, [tool, color, strokeWidth]);
+  }, [tool, color, strokeWidth, fill, opacity, toWorld, eraseAtPosition]);
 
-  const handleMouseMove = useCallback((e) => {
-    if (!isDrawing ) return;
-    const { offsetX, offsetY } = e.nativeEvent;
-    const currentPressure = e.nativeEvent.pressure || 1;
-    const currentPoint = {x: offsetX, y: offsetY, pressure: currentPressure};
+  const handlePointerMove = useCallback((e) => {
+    const screenX = e.nativeEvent.offsetX;
+    const screenY = e.nativeEvent.offsetY;
 
-    if(tool === "eraser" && isErasing){
-      if(isErasing){
-        eraseAtPosition(offsetX, offsetY);
-        setEraserPath(prev => [...prev, currentPoint]);   
-      }
+    if (panStart.current) {
+      const dx = screenX - panStart.current.x;
+      const dy = screenY - panStart.current.y;
+      panStart.current = { x: screenX, y: screenY };
+      setView((v) => ({ ...v, x: v.x + dx, y: v.y + dy }));
+      return;
+    }
+
+    if (!isDrawing) return;
+
+    const { x, y } = toWorld(screenX, screenY);
+    const currentPressure = penPressure(e);
+    const currentPoint = { x, y, pressure: currentPressure };
+
+    if (isErasing) {
+      eraseAtPosition(x, y);
+      setEraserPath(prev => [...prev, currentPoint]);
       return ;
     }
     if (!myTempShape) return;
 
     let updatedShape = { ...myTempShape };
-    switch (tool) {
+    // Use the shape's own type: the tool may have been switched from the keyboard mid-drag.
+    switch (myTempShape.type) {
       case "rectangle":
       case "line":
       case "arrow":
-      case "diamond":
-        updatedShape.width = offsetX - startX;
-        updatedShape.height = offsetY - startY;
+        updatedShape.width = x - startX;
+        updatedShape.height = y - startY;
         break;
-      
+
+      case "diamond":
+        // A diamond is positioned by its centre (see drawShape), like the finished shape.
+        updatedShape.width = x - startX;
+        updatedShape.height = y - startY;
+        updatedShape.x = startX + updatedShape.width / 2;
+        updatedShape.y = startY + updatedShape.height / 2;
+        break;
+
       case "circle":
         updatedShape.radius = Math.sqrt(
-          Math.pow(offsetX - startX, 2) + Math.pow(offsetY - startY, 2)
+          Math.pow(x - startX, 2) + Math.pow(y - startY, 2)
         );
         break;
 
       case "freehand":
-        if (lastPoint && getDistance(lastPoint, currentPoint) > MIN_DISTANCE) {
+        if (lastPoint && getDistance(lastPoint, currentPoint) > MIN_DISTANCE / view.zoom) {
           // Add smoothed intermediate points
           const smoothedPoint = {
             x: lastPoint.x * SMOOTHING_FACTOR + currentPoint.x * (1 - SMOOTHING_FACTOR),
             y: lastPoint.y * SMOOTHING_FACTOR + currentPoint.y * (1 - SMOOTHING_FACTOR),
             pressure: currentPressure
           };
-          
+
           setSmoothPoints(prev => [...prev, smoothedPoint, currentPoint]);
           updatedShape.points = [...smoothPoints, smoothedPoint, currentPoint];
           setLastPoint(currentPoint);
@@ -376,80 +474,86 @@ export default function useCanvasDrawing(canvasRef) {
     }
 
     animationFrameRef.current = requestAnimationFrame(() => {
-      if(tool !== "eraser" && wsRef.current && wsRef.current.readyState === WebSocket.OPEN){
+      if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN){
         wsRef.current.send(JSON.stringify({
           type: "drawLiveShape",
           data: {canvasId, shapes: updatedShape}
         }));
       }
     });
-  }, [isDrawing, myTempShape, startX, startY, tool]); 
+  }, [isDrawing, isErasing, myTempShape, startX, startY, toWorld, eraseAtPosition, lastPoint, smoothPoints, getDistance, setView, view.zoom]);
 
-  const handleMouseUp = useCallback((e) => {
-    if (!isDrawing || !myTempShape) return;
+  const handlePointerUp = useCallback((e) => {
+    if (panStart.current) {
+      panStart.current = null;
+      setIsPanning(false);
+      return;
+    }
+
+    if (!isDrawing) return;
     setIsDrawing(false);
-    
-    if( tool === "eraser" || tool === "select"){
+
+    if (isErasing || !myTempShape) {
       setIsErasing(false);
       setEraserPath([]);
       deletedShapeIds.current.clear();
       setMyTempShape(null);
       return ;
     }
-    
-    const { offsetX, offsetY } = e.nativeEvent;
-    let finalShape = {...myTempShape};
 
-    switch(tool) {
+    const { x: endX, y: endY } = toWorld(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+    const dragged = Math.hypot(endX - startX, endY - startY) * view.zoom >= MIN_DRAG;
+    let finalShape = null;
+
+    switch(myTempShape.type) {
       case "rectangle":{
-        const x = Math.min(startX, offsetX);
-        const y = Math.min(startY, offsetY);
-        const width = Math.abs(offsetX - startX);
-        const height = Math.abs(offsetY - startY);
+        if (!dragged) break;
+        const x = Math.min(startX, endX);
+        const y = Math.min(startY, endY);
+        const width = Math.abs(endX - startX);
+        const height = Math.abs(endY - startY);
         finalShape = { type: "rectangle", x, y, width, height, color, strokeWidth, opacity, fill };
-        addShape(finalShape);
         break;
       }
 
       case "circle": {
+        if (!dragged) break;
         const radius = Math.sqrt(
-          Math.pow(offsetX - startX, 2) + Math.pow(offsetY - startY, 2)
+          Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)
         );
         finalShape = { type: "circle", x: startX, y: startY, radius, color, strokeWidth, fill, opacity};
-        addShape(finalShape);
         break;
       }
 
       case "line": {
-        const width = offsetX - startX;
-        const height = offsetY - startY;
+        if (!dragged) break;
+        const width = endX - startX;
+        const height = endY - startY;
         finalShape = { type: "line", x: startX, y: startY, width, height, color, strokeWidth };
-        addShape(finalShape);
         break;
       }
 
       case "arrow": {
-        const width = offsetX - startX;
-        const height = offsetY - startY;
+        if (!dragged) break;
+        const width = endX - startX;
+        const height = endY - startY;
         finalShape = { type: "arrow", x: startX, y: startY, width, height, color, strokeWidth };
-        addShape(finalShape);
         break;
       }
 
       case "diamond": {
-        const width = offsetX - startX;
-        const height = offsetY - startY;
+        if (!dragged) break;
+        const width = endX - startX;
+        const height = endY - startY;
         const x = startX + width / 2;
         const y = startY + height / 2;
         finalShape = { type: "diamond", x, y, width, height, color, strokeWidth, fill, opacity };
-        addShape(finalShape);
         break;
       }
 
       case "freehand": {
+        if (smoothPoints.length < 2) break;
         finalShape = { type: "freehand", points: smoothPoints, color, strokeWidth };
-        addShape(finalShape);
-        setSmoothPoints([]);
         break;
       }
 
@@ -463,11 +567,18 @@ export default function useCanvasDrawing(canvasRef) {
           fontSize: 16,
           fill
         };
-        addShape(finalShape);
         break;
       }
     }
-    
+
+    setMyTempShape(null);
+    setSmoothPoints([]);
+    if (!finalShape) return;
+
+    // The server does not tell the sender which id it saved the shape under, so give the
+    // local copy an id of its own. Without one, erasing a new shape removed every new shape.
+    addShape({ ...finalShape, id: `${LOCAL_ID_PREFIX}${crypto.randomUUID()}` });
+
     // const newHistory = history.slice(0, historyIndex + 1);
     // newHistory.push({ type: "add", shape: finalShape });
     // setHistory(newHistory);
@@ -479,10 +590,7 @@ export default function useCanvasDrawing(canvasRef) {
         data: { canvasId, shape: finalShape}
       }));
     }
-
-    setMyTempShape(null);
-    setFreehandPoints([]);
-  }, [isDrawing, startX, startY, tool, myTempShape, addShape, color, strokeWidth, smoothPoints]);
+  }, [isDrawing, isErasing, startX, startY, myTempShape, addShape, color, strokeWidth, opacity, fill, smoothPoints, toWorld, view.zoom]);
 
   const undo = useCallback(() => {
     if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN){
@@ -491,7 +599,7 @@ export default function useCanvasDrawing(canvasRef) {
         data: { canvasId, userId }
       }));
     }
-  }, [canvasId, userId]);
+  }, []);
 
   const redo = useCallback(() => {
     if(wsRef.current && wsRef.current.readyState === WebSocket.OPEN){
@@ -500,9 +608,14 @@ export default function useCanvasDrawing(canvasRef) {
         data: { canvasId, userId }
       }));
     }
-  }, [canvasId, userId]);
+  }, []);
 
-  return { handleMouseDown, handleMouseMove, handleMouseUp, undo, redo, isDrawing, isErasing };
+  return {
+    handlePointerDown, handlePointerMove, handlePointerUp,
+    undo, redo,
+    isDrawing, isErasing, isPanning,
+    connection,
+  };
 }
 
 
@@ -512,12 +625,12 @@ function isPointInsideShape(x, y, shape, tolerance = 10){
   if(!shape )return false;
 
   switch (shape.type.toLowerCase()) {
-    case "rectangle" :{ 
+    case "rectangle" :{
       const padding = tolerance;
       return (
-        x >= shape.x - padding && 
+        x >= shape.x - padding &&
         x <= shape.x + (shape.width || 0) + padding &&
-        y >= shape.y - padding && 
+        y >= shape.y - padding &&
         y <= shape.y + (shape.height || 0) + padding
       );
     }
@@ -529,11 +642,11 @@ function isPointInsideShape(x, y, shape, tolerance = 10){
     }
 
     case "line":
-    case "arrow": 
+    case "arrow":
       return pointNearLine(
-        x, y, 
-        shape.x, shape.y, 
-        shape.x + (shape.width || 0), 
+        x, y,
+        shape.x, shape.y,
+        shape.x + (shape.width || 0),
         shape.y + (shape.height || 0),
         tolerance
       );
@@ -541,7 +654,7 @@ function isPointInsideShape(x, y, shape, tolerance = 10){
     case "freehand":{
       if(!shape.points || shape.points.length === 0)  return false;
 
-      return shape.points.some(p => 
+      return shape.points.some(p =>
         Math.abs(x - p.x) < tolerance && Math.abs(y - p.y) < tolerance
       );
     }
@@ -550,7 +663,7 @@ function isPointInsideShape(x, y, shape, tolerance = 10){
       const textWidth = (shape.text || '').length * (shape.fontSize || 16) * 0.6;
       const textHeight = shape.fontSize || 16;
       const padding = tolerance;
-      
+
       return (
         x >= shape.x - padding &&
         x <= shape.x + textWidth + padding &&
@@ -564,7 +677,7 @@ function isPointInsideShape(x, y, shape, tolerance = 10){
       const dy = Math.abs(y - shape.y);
       const halfWidth = (shape.width || 0) / 2 + tolerance;
       const halfHeight = (shape.height || 0) / 2 + tolerance;
-      
+
       // Diamond detection using bounding box approach
       return dx / halfWidth + dy / halfHeight <= 1;
     }
@@ -586,7 +699,7 @@ function pointNearLine(px, py, x1, y1, x2, y2, tolerance = 15){
   const dot = A * C + B * D;
   const lenSq = C * C + D * D;
   let param = -1;
-  if(lenSq !== 0) 
+  if(lenSq !== 0)
     param = dot / lenSq;
 
   let xx, yy;

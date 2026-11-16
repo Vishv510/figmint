@@ -1,3 +1,53 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* Brand colour. Use it through the usual utilities: bg-mint-400, text-mint-800, ... */
+@theme {
+  --color-mint-50: #effcf6;
+  --color-mint-100: #d6f7e8;
+  --color-mint-200: #b0eed4;
+  --color-mint-300: #7ee0ba;
+  --color-mint-400: #3ecf9b;
+  --color-mint-500: #1bb382;
+  --color-mint-600: #0f906a;
+  --color-mint-700: #0e7357;
+  --color-mint-800: #105b47;
+  --color-mint-900: #0e4b3b;
+  --color-mint-950: #052a21;
+}
+
+@layer base {
+  body {
+    background-color: #fafafa;
+    color: #27272a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* A floating panel that sits on top of the canvas: toolbars, style panel, zoom controls. */
+  .island {
+    border: 1px solid #e4e4e7;
+    border-radius: 0.75rem;
+    background-color: #ffffff;
+    box-shadow:
+      0 1px 2px rgb(24 24 27 / 0.06),
+      0 6px 16px -6px rgb(24 24 27 / 0.12);
+  }
+
+  /* Dot grid behind the canvas. Size and position are set inline so it follows pan and zoom. */
+  .board-grid {
+    background-image: radial-gradient(circle, #d4d4d8 1px, transparent 1.25px);
+    background-size: 24px 24px;
+  }
+
+  /* Ring cursor for the eraser; its radius matches ERASER_RADIUS in hooks/useCanvas.js. */
+  .cursor-eraser {
+    cursor:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ccircle cx='15' cy='15' r='14' fill='rgba(255,255,255,0.55)' stroke='%2352525b' stroke-width='1.5'/%3E%3C/svg%3E")
+        15 15,
+      crosshair;
+  }
+}
